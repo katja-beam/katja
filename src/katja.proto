@@ -1,0 +1,47 @@
+// https://github.com/aphyr/riemann-java-client/blob/81dd51349cfcd4daf6b9ff80aa59f4aecbcc078c/src/main/proto/riemann/proto.proto
+
+option java_package = "com.aphyr.riemann";
+option java_outer_classname = "Proto";
+
+message RiemannPB_State {
+  optional int64 time = 1;
+  optional string state = 2;
+  optional string service = 3;
+  optional string host = 4;
+  optional string description = 5;
+  optional bool once = 6;
+  repeated string tags = 7;
+  optional float ttl = 8;
+}
+
+message RiemannPB_Event {
+  optional int64 time = 1;
+  optional string state = 2;
+  optional string service = 3;
+  optional string host = 4;
+  optional string description = 5;
+  repeated string tags = 7;
+  optional float ttl = 8;
+  repeated RiemannPB_Attribute attributes = 9;
+
+  optional sint64 metric_sint64 = 13;
+  optional double metric_d = 14;
+  optional float metric_f = 15;
+}
+
+message RiemannPB_Query {
+  optional string string = 1;
+}
+
+message RiemannPB_Msg {
+  optional bool ok = 2;
+  optional string error = 3;
+  repeated RiemannPB_State states = 4;
+  optional RiemannPB_Query query = 5;
+  repeated RiemannPB_Event events = 6;
+}
+
+message RiemannPB_Attribute {
+  required string key = 1;
+  optional string value = 2;
+}

@@ -1,0 +1,15 @@
+{application, katja, [
+  {description, "Erlang client for the Riemann network monitoring system."},
+  {vsn, "1.0"},
+  {modules, []},
+  {registered, [
+    katja_metrics,
+    katja_queries
+  ]},
+  {applications, [
+    kernel,
+    stdlib
+  ]},
+  {mod, {katja_app, []}},
+  {env, []}
+]}.

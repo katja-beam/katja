@@ -1,0 +1,216 @@
+% Copyright (c) 2014, Daniel Kempkens <daniel@kempkens.io>
+%
+% Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted,
+% provided that the above copyright notice and this permission notice appear in all copies.
+%
+% THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+% WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+% DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+% NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+%
+% @author Daniel Kempkens <daniel@kempkens.io>
+% @copyright 2014 Daniel Kempkens
+% @version 1.0
+% @doc Handles establishes (and disconnects) connections to Riemann.
+
+-module(katja_connection).
+
+-include("katja_types.hrl").
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
+
+-define(DEFAULT_HOST, {ok, "127.0.0.1"}).
+-define(DEFAULT_PORT, {ok, 5555}).
+-define(TCP_MIN_SIZE, 16385).
+
+-record(connection_state, {
+  tcp_socket = undefined :: gen_tcp:socket() | undefined,
+  udp_socket = undefined :: gen_udp:socket() | undefined,
+  host = undefined :: string() | undefined,
+  port = undefined :: pos_integer() | undefined
+}).
+
+-opaque state() :: #connection_state{}.
+
+-export_type([state/0]).
+
+% API
+-export([
+  connect/0,
+  connect/2,
+  connect_udp/0,
+  connect_udp/2,
+  connect_tcp/0,
+  connect_tcp/2,
+  send_message/2,
+  send_message/3
+]).
+
+% API
+
+% @doc Tries to connect to Riemann via UDP and TCP.<br />
+%      <em>Host</em> and <em>Port</em> are read from the application configuration.<br />
+%      Defaults:<br />
+%      Host: 127.0.0.1<br />
+%      Port: 5555
+-spec connect() -> {ok, state()} | {error, term()}.
+connect() ->
+  {ok, Host} = application:get_env(katja, host, ?DEFAULT_HOST),
+  {ok, Port} = application:get_env(katja, port, ?DEFAULT_PORT),
+  connect(Host, Port).
+
+% @doc Tries to connect to Riemann via UDP and TCP using the specified <em>Host</em> and <em>Port</em>.
+-spec connect(string(), pos_integer()) -> {ok, state()} | {error, term()}.
+connect(Host, Port) ->
+  State = #connection_state{host=Host, port=Port},
+  case maybe_connect_udp(State) of
+    {ok, State2} -> maybe_connect_tcp(State2);
+    {error, _Reason}=E -> E
+  end.
+
+% @doc Tries to connect to Riemann via UDP only.<br />
+%      <em>Host</em> and <em>Port</em> are read from the application configuration.<br />
+%      Defaults:<br />
+%      Host: 127.0.0.1<br />
+%      Port: 5555
+-spec connect_udp() -> {ok, state()} | {error, term()}.
+connect_udp() ->
+  {ok, Host} = application:get_env(katja, host, ?DEFAULT_HOST),
+  {ok, Port} = application:get_env(katja, port, ?DEFAULT_PORT),
+  connect_udp(Host, Port).
+
+% @doc Tries to connect to Riemann via UDP using the specified <em>Host</em> and <em>Port</em>.
+-spec connect_udp(string(), pos_integer()) -> {ok, state()} | {error, term()}.
+connect_udp(Host, Port) ->
+  State = #connection_state{host=Host, port=Port},
+  maybe_connect_udp(State).
+
+% @doc Tries to connect to Riemann via TCP only.<br />
+%      <em>Host</em> and <em>Port</em> are read from the application configuration.<br />
+%      Defaults:<br />
+%      Host: 127.0.0.1<br />
+%      Port: 5555
+-spec connect_tcp() -> {ok, state()} | {error, term()}.
+connect_tcp() ->
+  {ok, Host} = application:get_env(katja, host, ?DEFAULT_HOST),
+  {ok, Port} = application:get_env(katja, port, ?DEFAULT_PORT),
+  connect_tcp(Host, Port).
+
+% @doc Tries to connect to Riemann via TCP using the specified <em>Host</em> and <em>Port</em>.
+-spec connect_tcp(string(), pos_integer()) -> {ok, state()} | {error, term()}.
+connect_tcp(Host, Port) ->
+  State = #connection_state{host=Host, port=Port},
+  maybe_connect_tcp(State).
+
+% @doc Delegates to {@link send_message/3}. <em>Type</em> is detected based on the size of the message.
+-spec send_message(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
+send_message(Msg, State) ->
+  Type = send_message_transport(Msg),
+  send_message(Type, Msg, State).
+
+% @doc Sends a message to Riemann via UDP or TCP.
+-spec send_message(udp | tcp, binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
+send_message(udp, Msg, State) -> send_message_udp(Msg, State);
+send_message(tcp, Msg, State) -> send_message_tcp(Msg, State).
+
+% Private
+
+-spec maybe_connect_udp(state()) -> {ok, state()} | {error, term()}.
+maybe_connect_udp(State) ->
+  case gen_udp:open(0, [binary, {active, false}]) of
+    {ok, Socket} ->
+      State2 = State#connection_state{udp_socket=Socket},
+      {ok, State2};
+    {error, _Reason}=E -> E
+  end.
+
+-spec maybe_connect_tcp(state()) -> {ok, state()} | {error, term()}.
+maybe_connect_tcp(#connection_state{host=Host, port=Port}=S) ->
+  Options = [binary, {active,false}, {nodelay, true}],
+  case gen_tcp:connect(Host, Port, Options, 5000) of
+    {ok, Socket} ->
+      S2 = S#connection_state{tcp_socket=Socket},
+      {ok, S2};
+    {error, _Reason}=E -> E
+  end.
+
+-spec send_message_transport(binary()) -> udp | tcp.
+send_message_transport(Msg) ->
+  MsgSize = byte_size(Msg),
+  if
+    MsgSize < ?TCP_MIN_SIZE -> udp;
+    true -> tcp
+  end.
+
+-spec send_message_udp(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
+send_message_udp(Msg, #connection_state{host=Host, port=Port, udp_socket=Socket}=S) when Socket =/= undefined ->
+  case gen_udp:send(Socket, Host, Port, Msg) of
+    ok ->
+      RetMsg = #riemannpb_msg{ok=true},
+      {{ok, RetMsg}, S};
+    {error, _Reason}=E -> {E, S}
+  end.
+
+-spec send_message_tcp(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
+send_message_tcp(Msg, #connection_state{host=Host, port=Port, tcp_socket=Socket}=S) when Socket =/= undefined ->
+  MsgSize = byte_size(Msg),
+  Msg2 = <<MsgSize:32/integer-big, Msg/binary>>,
+  case gen_tcp:send(Socket, Msg2) of
+    ok ->
+      case receive_reply_tcp(Socket) of
+        {ok, _RetMsg}=O -> {O, S};
+        {error, closed} -> send_message_tcp(Msg, S);
+        {error, _Reason}=E -> {E, S}
+      end;
+    {error, closed} ->
+      case connect_tcp(Host, Port) of
+        {ok, #connection_state{tcp_socket=NewSocket}} ->
+          S2 = S#connection_state{tcp_socket=NewSocket},
+          send_message_tcp(Msg, S2);
+        {error, _Reason}=E ->
+          S2 = S#connection_state{tcp_socket=undefined},
+          {E, S2}
+      end;
+    {error, _Reason}=E -> {E, S}
+  end.
+
+-spec receive_reply_tcp(gen_tcp:socket()) -> {ok, term()} | {error, term()}.
+receive_reply_tcp(Socket) ->
+  receive_reply_tcp(Socket, <<>>).
+
+-spec receive_reply_tcp(gen_tcp:socket(), binary()) -> {ok, term()} | {error, term()}.
+receive_reply_tcp(Socket, Buffer) ->
+  case gen_tcp:recv(Socket, 0, 5000) of
+    {ok, BinMsg} ->
+      BinMsg2 = <<Buffer/binary, BinMsg/binary>>,
+      case decode_message(BinMsg2) of
+        too_short -> receive_reply_tcp(Socket, BinMsg2);
+        #riemannpb_msg{ok=true}=Msg -> {ok, Msg};
+        #riemannpb_msg{ok=false, error=Reason} -> {error, Reason}
+      end;
+    {error, _Reason}=E -> E
+  end.
+
+-spec decode_message(binary()) -> riemannpb_message() | too_short.
+decode_message(<<MsgSize:32/integer-big, Msg/binary>>) when MsgSize > byte_size(Msg) ->
+  too_short;
+decode_message(<<MsgSize:32/integer-big, Msg/binary>>) ->
+  case Msg of
+    <<Msg2:MsgSize/binary, _Rest/binary>> -> katja_pb:decode_riemannpb_msg(Msg2);
+    _ -> #riemannpb_msg{ok=false, error="Response could not be decoded"}
+  end.
+
+% Tests (private functions)
+
+-ifdef(TEST).
+send_message_transport_test() ->
+  BinData = unicode:characters_to_binary(lists:flatten(lists:duplicate(?TCP_MIN_SIZE, "a"))),
+  ?assertEqual(udp, send_message_transport(<<>>)),
+  ?assertEqual(tcp, send_message_transport(BinData)),
+  ?assertEqual(udp, send_message_transport(binary:part(BinData, 0, byte_size(BinData) - 1))).
+
+decode_message_test() ->
+  ?assertMatch(too_short, decode_message(<<4:32/integer-big, "xxx">>)).
+-endif.

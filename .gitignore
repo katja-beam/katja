@@ -1,0 +1,14 @@
+.DS_Store
+.eunit/
+.rebar/
+deps/
+doc/
+ebin/
+logs/
+erl_crash.dump
+*.analysis
+*.beam
+*.plt
+*.trace
+
+include/katja_pb.hrl
