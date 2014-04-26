@@ -51,7 +51,7 @@ eunit:
 	@./rebar skip_deps=true eunit
 
 ct:
-	@./rebar skip_deps=true ct
+	@./rebar skip_deps=true ct -v
 
 test: compile eunit ct
 

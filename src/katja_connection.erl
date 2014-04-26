@@ -11,7 +11,7 @@
 % @author Daniel Kempkens <daniel@kempkens.io>
 % @copyright 2014 Daniel Kempkens
 % @version 1.0
-% @doc Handles establishes (and disconnects) connections to Riemann.
+% @doc Handles connections to Riemann.
 
 -module(katja_connection).
 
@@ -44,6 +44,7 @@
   connect_udp/2,
   connect_tcp/0,
   connect_tcp/2,
+  disconnect/1,
   send_message/2,
   send_message/3
 ]).
@@ -103,6 +104,14 @@ connect_tcp() ->
 connect_tcp(Host, Port) ->
   State = #connection_state{host=Host, port=Port},
   maybe_connect_tcp(State).
+
+-spec disconnect(state()) -> ok.
+disconnect(#connection_state{udp_socket=undefined, tcp_socket=undefined}) -> ok;
+disconnect(#connection_state{udp_socket=Socket, tcp_socket=undefined}) -> gen_udp:close(Socket);
+disconnect(#connection_state{udp_socket=undefined, tcp_socket=Socket}) -> gen_tcp:close(Socket);
+disconnect(#connection_state{udp_socket=UdpSocket, tcp_socket=TcpSocket}) ->
+  ok = gen_udp:close(UdpSocket),
+  gen_tcp:close(TcpSocket).
 
 % @doc Delegates to {@link send_message/3}. <em>Type</em> is detected based on the size of the message.
 -spec send_message(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
@@ -205,6 +214,11 @@ decode_message(<<MsgSize:32/integer-big, Msg/binary>>) ->
 % Tests (private functions)
 
 -ifdef(TEST).
+disconnect_test() ->
+  ?assertEqual(ok, disconnect(#connection_state{})),
+  {ok, Socket} = gen_udp:open(0, [binary, {active, false}]),
+  ?assertEqual(ok, disconnect(#connection_state{udp_socket=Socket})).
+
 send_message_transport_test() ->
   BinData = unicode:characters_to_binary(lists:flatten(lists:duplicate(?TCP_MIN_SIZE, "a"))),
   ?assertEqual(udp, send_message_transport(<<>>)),

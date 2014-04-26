@@ -76,7 +76,8 @@ handle_info(_Msg, State) ->
   {noreply, State}.
 
 % @hidden
-terminate(normal, _State) ->
+terminate(normal, State) ->
+  ok = katja_connection:disconnect(State),
   ok.
 
 % @hidden
