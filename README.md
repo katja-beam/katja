@@ -2,6 +2,8 @@
 
 A simple [Riemann](http://riemann.io) client written in Erlang.
 
+[![Build Status](https://travis-ci.org/nifoc/katja.png)](https://travis-ci.org/nifoc/katja)
+
 ## Status
 
 This is alpha software. Things might still change in ways that break everything.
