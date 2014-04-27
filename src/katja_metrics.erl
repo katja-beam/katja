@@ -131,7 +131,9 @@ set_event_field(tags, undefined, E) -> E#riemannpb_event{tags=[]};
 set_event_field(tags, V, E) -> E#riemannpb_event{tags=V};
 set_event_field(ttl, V, E) -> E#riemannpb_event{ttl=V};
 set_event_field(attributes, undefined, E) -> E#riemannpb_event{attributes=[]};
-set_event_field(attributes, V, E) -> E#riemannpb_event{attributes=V};
+set_event_field(attributes, V, E) ->
+  Attrs = [#riemannpb_attribute{key=AKey, value=AVal} || {AKey, AVal} <- V],
+  E#riemannpb_event{attributes=Attrs};
 set_event_field(metric, undefined, E) -> E#riemannpb_event{metric_f = 0.0, metric_sint64 = 0};
 set_event_field(metric, V, E) when is_integer(V) -> E#riemannpb_event{metric_f = V * 1.0, metric_sint64 = V};
 set_event_field(metric, V, E) -> E#riemannpb_event{metric_f = V, metric_d = V}.
@@ -194,7 +196,8 @@ create_event_test() ->
   ?assertMatch(#riemannpb_event{metric_f=0.0, metric_sint64=0}, create_event(?TEST_DATA)),
   ?assertMatch(#riemannpb_event{metric_f=1.0, metric_sint64=1}, create_event(?TEST_DATA ++ [{metric, 1}])),
   ?assertMatch(#riemannpb_event{metric_f=2.0, metric_d=2.0}, create_event(?TEST_DATA ++ [{metric, 2.0}])),
-  ?assertMatch(#riemannpb_event{ttl=900.1, attributes=[{"foo", "bar"}]}, create_event(?TEST_DATA ++ [{ttl, 900.1}, {attributes, [{"foo", "bar"}]}])).
+  ?assertMatch(#riemannpb_event{ttl=900.1, attributes=[#riemannpb_attribute{key="foo", value="bar"}]},
+               create_event(?TEST_DATA ++ [{ttl, 900.1}, {attributes, [{"foo", "bar"}]}])).
 
 create_state_test() ->
   DefaultHost = default_hostname(),

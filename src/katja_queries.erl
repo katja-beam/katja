@@ -113,9 +113,13 @@ event_to_proplist(Event) ->
     undefined -> [{metric, Event#riemannpb_event.metric_f}|Event3];
     Int -> [{metric, Int}|Event3]
   end,
-  lists:foldr(fun(Key, Acc) ->
-    lists:keydelete(Key, 1, Acc)
-  end, Event4, [metric_sint64, metric_f, metric_d]).
+  Event5 = case Event#riemannpb_event.attributes of
+    undefined -> Event4;
+    Attrs ->
+      Attrs2 = [{AKey, AVal} || {riemannpb_attribute, AKey, AVal} <- Attrs],
+      lists:keyreplace(attributes, 1, Event4, {attributes, Attrs2})
+  end,
+  lists:foldr(fun(Key, Acc) -> lists:keydelete(Key, 1, Acc) end, Event5, [metric_sint64, metric_f, metric_d]).
 
 % Tests (private functions)
 
