@@ -27,7 +27,8 @@
 % API
 -export([
   start_link/0,
-  send_event/1
+  send_event/1,
+  send_state/1
 ]).
 
 % gen_server
@@ -53,6 +54,12 @@ send_event(Data) ->
   Event = create_event(Data),
   gen_server:call(?MODULE, {send_event, Event}).
 
+% @doc Sends a state to Riemann.
+-spec send_state(katja:event()) -> ok | {error, term()}.
+send_state(Data) ->
+  State = create_state(Data),
+  gen_server:call(?MODULE, {send_state, State}).
+
 % gen_server
 
 % @hidden
@@ -63,6 +70,10 @@ init([]) ->
 % @hidden
 handle_call({send_event, Event}, _From, State) ->
   Msg = create_message([Event]),
+  {Reply, State2} = send_message(Msg, State),
+  {reply, Reply, State2};
+handle_call({send_state, RState}, _From, State) ->
+  Msg = create_message([RState]),
   {Reply, State2} = send_message(Msg, State),
   {reply, Reply, State2};
 handle_call(terminate, _From, State) ->
@@ -99,13 +110,21 @@ create_event(Data) ->
     end
   end, Event, [attributes, metric|?COMMON_FIELDS]).
 
+-spec create_state(katja:state()) -> riemannpb_state().
+create_state(Data) ->
+  State = #riemannpb_state{},
+  lists:foldr(fun(K, E) ->
+    case lists:keyfind(K, 1, Data) of
+      {K, V} -> set_state_field(K, V, E);
+      false -> set_state_field(K, undefined, E)
+    end
+  end, State, [once|?COMMON_FIELDS]).
+
 -spec set_event_field(atom(), term(), riemannpb_event()) -> riemannpb_event().
 set_event_field(time, V, E) -> E#riemannpb_event{time=V};
 set_event_field(state, V, E) -> E#riemannpb_event{state=V};
 set_event_field(service, V, E) -> E#riemannpb_event{service=V};
-set_event_field(host, undefined, E) ->
-  {ok, Host} = inet:gethostname(),
-  E#riemannpb_event{host=Host};
+set_event_field(host, undefined, E) -> E#riemannpb_event{host=default_hostname()};
 set_event_field(host, V, E) -> E#riemannpb_event{host=V};
 set_event_field(description, V, E) -> E#riemannpb_event{description=V};
 set_event_field(tags, undefined, E) -> E#riemannpb_event{tags=[]};
@@ -116,6 +135,23 @@ set_event_field(attributes, V, E) -> E#riemannpb_event{attributes=V};
 set_event_field(metric, undefined, E) -> E#riemannpb_event{metric_f = 0.0, metric_sint64 = 0};
 set_event_field(metric, V, E) when is_integer(V) -> E#riemannpb_event{metric_f = V * 1.0, metric_sint64 = V};
 set_event_field(metric, V, E) -> E#riemannpb_event{metric_f = V, metric_d = V}.
+
+-spec set_state_field(atom(), term(), riemannpb_state()) -> riemannpb_state().
+set_state_field(time, V, S) -> S#riemannpb_state{time=V};
+set_state_field(state, V, S) -> S#riemannpb_state{state=V};
+set_state_field(service, V, S) -> S#riemannpb_state{service=V};
+set_state_field(host, undefined, S) -> S#riemannpb_state{host=default_hostname()};
+set_state_field(host, V, S) -> S#riemannpb_state{host=V};
+set_state_field(description, V, S) -> S#riemannpb_state{description=V};
+set_state_field(tags, undefined, S) -> S#riemannpb_state{tags=[]};
+set_state_field(tags, V, S) -> S#riemannpb_state{tags=V};
+set_state_field(ttl, V, S) -> S#riemannpb_state{ttl=V};
+set_state_field(once, V, S) -> S#riemannpb_state{once=V}.
+
+-spec default_hostname() -> string().
+default_hostname() ->
+  {ok, Host} = inet:gethostname(),
+  Host.
 
 -spec create_message([riemannpb_entity()]) -> riemannpb_message().
 create_message(Entities) ->
@@ -139,30 +175,42 @@ send_message(Msg, State) ->
 % Tests (private functions)
 
 -ifdef(TEST).
+-define(TEST_DATA, [
+  {time, 1},
+  {state, "online"},
+  {service, "katja"},
+  {host, "localhost"},
+  {description, "katja test"},
+  {tags, ["foo", "bar"]}
+]).
+
 create_event_test() ->
-  Data = [
-    {time, 1},
-    {state, "online"},
-    {service, "katja"},
-    {host, "localhost"},
-    {description, "katja test"},
-    {tags, ["foo", "bar"]}
-  ],
-  ?assertMatch(#riemannpb_event{time=1, state="online", service="katja", host="localhost", description="katja test", tags=["foo", "bar"]}, create_event(Data)),
-  ?assertMatch(#riemannpb_event{metric_f=0.0, metric_sint64=0}, create_event(Data)),
-  ?assertMatch(#riemannpb_event{metric_f=1.0, metric_sint64=1}, create_event(Data ++ [{metric, 1}])),
-  ?assertMatch(#riemannpb_event{metric_f=2.0, metric_d=2.0}, create_event(Data ++ [{metric, 2.0}])),
-  ?assertMatch(#riemannpb_event{ttl=900.1, attributes=[{"foo", "bar"}]}, create_event(Data ++ [{ttl, 900.1}, {attributes, [{"foo", "bar"}]}])).
+  DefaultHost = default_hostname(),
+  ?assertMatch(#riemannpb_event{time=1, state="online", service="katja", host="localhost", description="katja test", tags=["foo", "bar"]}, create_event(?TEST_DATA)),
+  ?assertMatch(#riemannpb_event{time=1, state="online", service="katja", host="localhost", description="katja test", tags=[]},
+               create_event(lists:keydelete(tags, 1, ?TEST_DATA))),
+  ?assertMatch(#riemannpb_event{time=1, state="online", service="katja", host=DefaultHost, description="katja test", tags=["foo", "bar"]},
+               create_event(lists:keydelete(host, 1, ?TEST_DATA))),
+  ?assertMatch(#riemannpb_event{metric_f=0.0, metric_sint64=0}, create_event(?TEST_DATA)),
+  ?assertMatch(#riemannpb_event{metric_f=1.0, metric_sint64=1}, create_event(?TEST_DATA ++ [{metric, 1}])),
+  ?assertMatch(#riemannpb_event{metric_f=2.0, metric_d=2.0}, create_event(?TEST_DATA ++ [{metric, 2.0}])),
+  ?assertMatch(#riemannpb_event{ttl=900.1, attributes=[{"foo", "bar"}]}, create_event(?TEST_DATA ++ [{ttl, 900.1}, {attributes, [{"foo", "bar"}]}])).
+
+create_state_test() ->
+  DefaultHost = default_hostname(),
+  ?assertMatch(#riemannpb_state{time=1, state="online", service="katja", host="localhost", description="katja test", tags=["foo", "bar"]}, create_state(?TEST_DATA)),
+  ?assertMatch(#riemannpb_state{time=1, state="online", service="katja", host="localhost", description="katja test", tags=[]},
+               create_state(lists:keydelete(tags, 1, ?TEST_DATA))),
+  ?assertMatch(#riemannpb_state{time=1, state="online", service="katja", host=DefaultHost, description="katja test", tags=["foo", "bar"]},
+               create_state(lists:keydelete(host, 1, ?TEST_DATA))).
 
 create_message_test() ->
-  Data = [
-    {time, 1},
-    {state, "online"},
-    {service, "katja"},
-    {host, "localhost"},
-    {description, "katja test"},
-    {tags, ["foo", "bar"]}
-  ],
-  Event = create_event(Data),
-  ?assertMatch(#riemannpb_msg{events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}]}, create_message([Event])).
+  Event = create_event(?TEST_DATA),
+  State = create_state(?TEST_DATA),
+  ?assertMatch(#riemannpb_msg{events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}]}, create_message([Event])),
+  ?assertMatch(#riemannpb_msg{states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]}, create_message([State])),
+  ?assertMatch(#riemannpb_msg{
+                 events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}],
+                 states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]
+               }, create_message([Event, State])).
 -endif.

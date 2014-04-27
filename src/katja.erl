@@ -26,17 +26,27 @@
 -type riemann_ttl() :: {ttl, float()}.
 -type riemann_attributes() :: {attributes, [{string(), string()}]}.
 -type riemann_metric() :: {metric, number()}.
+-type riemann_once() :: {once, boolean()}.
 
 -type riemann_event_opts() :: riemann_time() | riemann_state() | riemann_service() |
                               riemann_host() | riemann_description() | riemann_tags() |
                               riemann_ttl() | riemann_attributes() | riemann_metric().
--type event() :: [riemann_event_opts()].
+-type riemann_state_opts() :: riemann_time() | riemann_state() | riemann_service() |
+                              riemann_host() | riemann_description() | riemann_tags() |
+                              riemann_ttl() | riemann_once().
 
--export_type([event/0]).
+-type event() :: [riemann_event_opts()].
+-type state() :: [riemann_state_opts()].
+
+-export_type([
+  event/0,
+  state/0
+]).
 
 % API
 -export([
   send_event/1,
+  send_state/1,
   query/1
 ]).
 
@@ -46,6 +56,11 @@
 -spec send_event(event()) -> ok | {error, term()}.
 send_event(Data) ->
   katja_metrics:send_event(Data).
+
+% @doc Delegates to {@link katja_metrics:send_state/1}.
+-spec send_state(state()) -> ok | {error, term()}.
+send_state(Data) ->
+  katja_metrics:send_state(Data).
 
 % @doc Delegates to {@link katja_queries:query/1}.
 -spec query(string()) -> {ok, [event()]} | {error, term()}.

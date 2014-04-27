@@ -27,6 +27,7 @@
 % Tests
 -export([
   send_event/1,
+  send_state/1,
   query/1
 ]).
 
@@ -35,6 +36,7 @@
 all() ->
   [
     send_event,
+    send_state,
     query
   ].
 
@@ -52,6 +54,9 @@ send_event(_Config) ->
   ok = katja:send_event([{service, "katja"}, {metric, 9001}]),
   Description = lists:flatten(lists:duplicate(4096, "abcd")),
   ok = katja:send_event([{service, "katja"}, {metric, 9001}, {description, Description}]).
+
+send_state(_Config) ->
+  ok = katja:send_state([{service, "katja"}, {state, "testing"}]).
 
 query(_Config) ->
   {ok, [Event]} = katja:query("service = \"katja\""),
