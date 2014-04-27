@@ -92,28 +92,30 @@ code_change(_OldVsn, State, _Extra) ->
 -spec create_event(katja:event()) -> riemannpb_event().
 create_event(Data) ->
   Event = #riemannpb_event{},
-  Event2 = lists:foldr(fun(K, E) ->
+  lists:foldr(fun(K, E) ->
     case lists:keyfind(K, 1, Data) of
       {K, V} -> set_event_field(K, V, E);
-      false -> E
+      false -> set_event_field(K, undefined, E)
     end
-  end, Event, [attributes|?COMMON_FIELDS]),
-  Metric = lists:keyfind(metric, 1, Data),
-  set_event_field(metric, Metric, Event2).
+  end, Event, [attributes, metric|?COMMON_FIELDS]).
 
 -spec set_event_field(atom(), term(), riemannpb_event()) -> riemannpb_event().
 set_event_field(time, V, E) -> E#riemannpb_event{time=V};
 set_event_field(state, V, E) -> E#riemannpb_event{state=V};
 set_event_field(service, V, E) -> E#riemannpb_event{service=V};
+set_event_field(host, undefined, E) ->
+  {ok, Host} = inet:gethostname(),
+  E#riemannpb_event{host=Host};
 set_event_field(host, V, E) -> E#riemannpb_event{host=V};
 set_event_field(description, V, E) -> E#riemannpb_event{description=V};
+set_event_field(tags, undefined, E) -> E#riemannpb_event{tags=[]};
 set_event_field(tags, V, E) -> E#riemannpb_event{tags=V};
 set_event_field(ttl, V, E) -> E#riemannpb_event{ttl=V};
+set_event_field(attributes, undefined, E) -> E#riemannpb_event{attributes=[]};
 set_event_field(attributes, V, E) -> E#riemannpb_event{attributes=V};
-set_event_field(metric, false, E) -> E#riemannpb_event{metric_f = 0.0, metric_sint64 = 0};
-set_event_field(metric, {metric, V}, E) when is_integer(V) ->
-  E#riemannpb_event{metric_f = V * 1.0, metric_sint64 = V};
-set_event_field(metric, {metric, V}, E) -> E#riemannpb_event{metric_f = V, metric_d = V}.
+set_event_field(metric, undefined, E) -> E#riemannpb_event{metric_f = 0.0, metric_sint64 = 0};
+set_event_field(metric, V, E) when is_integer(V) -> E#riemannpb_event{metric_f = V * 1.0, metric_sint64 = V};
+set_event_field(metric, V, E) -> E#riemannpb_event{metric_f = V, metric_d = V}.
 
 -spec create_message([riemannpb_entity()]) -> riemannpb_message().
 create_message(Entities) ->
