@@ -105,6 +105,7 @@ connect_tcp(Host, Port) ->
   State = #connection_state{host=Host, port=Port},
   maybe_connect_tcp(State).
 
+% @doc Disconnects all connected sockets from Riemann.
 -spec disconnect(state()) -> ok.
 disconnect(#connection_state{udp_socket=undefined, tcp_socket=undefined}) -> ok;
 disconnect(#connection_state{udp_socket=Socket, tcp_socket=undefined}) -> gen_udp:close(Socket);
