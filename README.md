@@ -8,6 +8,22 @@ A simple [Riemann](http://riemann.io) client written in Erlang.
 
 This is alpha software. Things might still change in ways that break everything.
 
+## Configuration
+
+```erlang
+% Defaults
+[
+  {katja, [
+    {host, "127.0.0.1"},
+    {port, 5555}
+  ]}
+].
+```
+
+**host**: Host Riemann is running on
+
+**port**: Port Riemann is listening on
+
 ## Examples
 
 ### Sending an event
@@ -18,6 +34,15 @@ ok = katja:send_event(Event).
 ```
 
 An event in Katja is just a property list. A list of all possible properties can be found in the `katja` module.
+
+### Sending a state
+
+```erlang
+State = [{service, "katja demo"}, {state, "testing"}],
+ok = katja:send_state(State).
+```
+
+Just like events, a state is a property list. The properties can once again be found in the `katja` module.
 
 ### Querying
 
