@@ -28,7 +28,8 @@
 -export([
   start_link/0,
   send_event/1,
-  send_state/1
+  send_state/1,
+  send_entities/1
 ]).
 
 % gen_server
@@ -52,13 +53,27 @@ start_link() ->
 -spec send_event(katja:event()) -> ok | {error, term()}.
 send_event(Data) ->
   Event = create_event(Data),
-  gen_server:call(?MODULE, {send_event, Event}).
+  gen_server:call(?MODULE, {send_message, event, Event}).
 
 % @doc Sends a state to Riemann.
 -spec send_state(katja:event()) -> ok | {error, term()}.
 send_state(Data) ->
   State = create_state(Data),
-  gen_server:call(?MODULE, {send_state, State}).
+  gen_server:call(?MODULE, {send_message, state, State}).
+
+% @doc Sends multiple entities (events and/or states) ti Riemann.
+-spec send_entities(katja:entities()) -> ok | {error, term()}.
+send_entities(Data) ->
+  StateEntities = case lists:keyfind(states, 1, Data) of
+    {states, States} -> [create_state(S) || S <- States];
+    false -> []
+  end,
+  EventEntities = case lists:keyfind(events, 1, Data) of
+    {events, Events} -> [create_event(E) || E <- Events];
+    false -> []
+  end,
+  Entities = StateEntities ++ EventEntities,
+  gen_server:call(?MODULE, {send_message, entities, Entities}).
 
 % gen_server
 
@@ -68,12 +83,8 @@ init([]) ->
   {ok, State}.
 
 % @hidden
-handle_call({send_event, Event}, _From, State) ->
-  Msg = create_message([Event]),
-  {Reply, State2} = send_message(Msg, State),
-  {reply, Reply, State2};
-handle_call({send_state, RState}, _From, State) ->
-  Msg = create_message([RState]),
+handle_call({send_message, _Type, Data}, _From, State) ->
+  Msg = create_message(Data),
   {Reply, State2} = send_message(Msg, State),
   {reply, Reply, State2};
 handle_call(terminate, _From, State) ->
@@ -155,7 +166,9 @@ default_hostname() ->
   {ok, Host} = inet:gethostname(),
   Host.
 
--spec create_message([riemannpb_entity()]) -> riemannpb_message().
+-spec create_message(riemannpb_entity() | [riemannpb_entity()]) -> riemannpb_message().
+create_message(Entity) when not is_list(Entity) ->
+  create_message([Entity]);
 create_message(Entities) ->
   {Events, States} = lists:splitwith(fun(Entity) ->
     if
@@ -210,7 +223,9 @@ create_state_test() ->
 create_message_test() ->
   Event = create_event(?TEST_DATA),
   State = create_state(?TEST_DATA),
+  ?assertMatch(#riemannpb_msg{events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}]}, create_message(Event)),
   ?assertMatch(#riemannpb_msg{events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}]}, create_message([Event])),
+  ?assertMatch(#riemannpb_msg{states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]}, create_message(State)),
   ?assertMatch(#riemannpb_msg{states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]}, create_message([State])),
   ?assertMatch(#riemannpb_msg{
                  events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}],

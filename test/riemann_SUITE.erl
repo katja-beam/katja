@@ -29,6 +29,7 @@
 -export([
   send_event/1,
   send_state/1,
+  send_entities/1,
   query/1
 ]).
 
@@ -38,6 +39,7 @@ all() ->
   [
     send_event,
     send_state,
+    send_entities,
     query
   ].
 
@@ -59,6 +61,13 @@ send_event(_Config) ->
 
 send_state(_Config) ->
   ok = katja:send_state([{service, "katja 1"}, {state, "testing"}]).
+
+send_entities(_Config) ->
+  Event = [{service, "katja 1"}, {metric, 9001}],
+  State = [{service, "katja 1"}, {state, "testing"}],
+  ok = katja:send_entities([{events, [Event]}]),
+  ok = katja:send_entities([{states, [State]}]),
+  ok = katja:send_entities([{states, [State]}, {events, [Event]}]).
 
 query(_Config) ->
   {ok, [ServiceEvent]} = katja:query("service = \"katja 1\""),
