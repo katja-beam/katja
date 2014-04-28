@@ -114,7 +114,7 @@ event_to_proplist(Event) ->
     Int -> [{metric, Int}|Event3]
   end,
   Event5 = case Event#riemannpb_event.attributes of
-    undefined -> Event4;
+    [] -> Event4;
     Attrs ->
       Attrs2 = [{AKey, AVal} || {riemannpb_attribute, AKey, AVal} <- Attrs],
       lists:keyreplace(attributes, 1, Event4, {attributes, Attrs2})
