@@ -61,7 +61,7 @@ send_state(Data) ->
   State = create_state(Data),
   gen_server:call(?MODULE, {send_message, state, State}).
 
-% @doc Sends multiple entities (events and/or states) ti Riemann.
+% @doc Sends multiple entities (events and/or states) to Riemann.
 -spec send_entities(katja:entities()) -> ok | {error, term()}.
 send_entities(Data) ->
   StateEntities = case lists:keyfind(states, 1, Data) of
