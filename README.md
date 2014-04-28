@@ -44,6 +44,18 @@ ok = katja:send_state(State).
 
 Just like events, a state is a property list. The properties can once again be found in the `katja` module.
 
+### Sending multiple entities
+
+```erlang
+Event = [{service, "katja demo"}, {metric, 9000.1}],
+State = [{service, "katja demo"}, {state, "testing"}],
+ok = katja:send_entities([{events, [Event, Event]}, {states, [State, State]}]).
+```
+
+`send_entities/1` takes a property list with two possible properties: `events` should be set to a list of events and `states` should be set to a list of states.
+
+Both properties are optional, so `send_entities/1` can be used to only send multiple events or states.
+
 ### Querying
 
 ```erlang
