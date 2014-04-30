@@ -28,7 +28,9 @@
 % Tests
 -export([
   send_event/1,
+  send_events/1,
   send_state/1,
+  send_states/1,
   send_entities/1,
   query/1
 ]).
@@ -38,7 +40,9 @@
 all() ->
   [
     send_event,
+    send_events,
     send_state,
+    send_states,
     send_entities,
     query
   ].
@@ -59,15 +63,25 @@ send_event(_Config) ->
   ok = katja:send_event([{service, "katja 1"}, {metric, 9001}, {description, Description}]),
   ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {attributes, [{"foo", "bar"}]}]).
 
+send_events(_Config) ->
+  Description = lists:flatten(lists:duplicate(4096, "abcd")),
+  Event = [{service, "katja 1"}, {metric, 9001}, {description, Description}],
+  ok = katja:send_events([Event, Event]).
+
 send_state(_Config) ->
   ok = katja:send_state([{service, "katja 1"}, {state, "testing"}]).
 
+send_states(_Config) ->
+  State = [{service, "katja 1"}, {state, "testing"}],
+  ok = katja:send_states([State, State]).
+
 send_entities(_Config) ->
-  Event = [{service, "katja 1"}, {metric, 9001}],
+  Description = lists:flatten(lists:duplicate(4096, "abcd")),
+  Event = [{service, "katja 1"}, {metric, 9001}, {description, Description}],
   State = [{service, "katja 1"}, {state, "testing"}],
   ok = katja:send_entities([{events, [Event]}]),
   ok = katja:send_entities([{states, [State]}]),
-  ok = katja:send_entities([{states, [State]}, {events, [Event]}]).
+  ok = katja:send_entities([{states, [State, State]}, {events, [Event, Event]}]).
 
 query(_Config) ->
   {ok, [ServiceEvent]} = katja:query("service = \"katja 1\""),

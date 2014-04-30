@@ -52,9 +52,18 @@ State = [{service, "katja demo"}, {state, "testing"}],
 ok = katja:send_entities([{events, [Event, Event]}, {states, [State, State]}]).
 ```
 
-`send_entities/1` takes a property list with two possible properties: `events` should be set to a list of events and `states` should be set to a list of states.
+`katja:send_entities/1` takes a property list with two possible properties: `events` should be set to a list of events and `states` should be set to a list of states.
 
-Both properties are optional, so `send_entities/1` can be used to only send multiple events or states.
+Both properties are optional, so `katja:send_entities/1` can be used to only send multiple events or states.
+
+```erlang
+Event = [{service, "katja demo"}, {metric, 9000.1}],
+State = [{service, "katja demo"}, {state, "testing"}],
+ok = katja:send_events([Event]),
+ok = katja:send_states([State]).
+```
+
+`katja:send_events/1` and `katja:send_states/1` are also available to send multiple events or states. Both of them delegate to `katja:send_entities/1` internally.
 
 ### Querying
 

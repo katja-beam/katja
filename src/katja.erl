@@ -48,7 +48,9 @@
 % API
 -export([
   send_event/1,
+  send_events/1,
   send_state/1,
+  send_states/1,
   send_entities/1,
   query/1
 ]).
@@ -60,10 +62,20 @@
 send_event(Data) ->
   katja_metrics:send_event(Data).
 
+% @doc Sends multiple events to Riemann. Simple wrapper around {@link send_entities/1}.
+-spec send_events([event()]) -> ok | {error, term()}.
+send_events(Data) ->
+  send_entities([{events, Data}]).
+
 % @doc Delegates to {@link katja_metrics:send_state/1}.
 -spec send_state(state()) -> ok | {error, term()}.
 send_state(Data) ->
   katja_metrics:send_state(Data).
+
+% @doc Sends multiple states to Riemann. Simple wrapper around {@link send_entities/1}.
+-spec send_states([state()]) -> ok | {error, term()}.
+send_states(Data) ->
+  send_entities([{states, Data}]).
 
 % @doc Delegates to {@link katja_metrics:send_entities/1}.
 -spec send_entities(entities()) -> ok | {error, term()}.
