@@ -32,23 +32,11 @@ clean:
 allclean:
 	@./rebar clean
 
-compile: $(DEPS) patch
+compile: $(DEPS)
 	@./rebar compile
 
 $(DEPS):
 	@./rebar get-deps
-
-UNAME := $(shell uname -s)
-ifeq ($(UNAME),Darwin)
-patch:
-	@echo "Patching ..."
-	@sed -i '' -e "s/warnings_as_errors,[[:space:]]//g" ./deps/meck/rebar.config
-endif
-ifeq ($(UNAME),Linux)
-patch:
-	@echo "Patching ..."
-	@sed -i -e "s/warnings_as_errors,[[:space:]]//g" ./deps/meck/rebar.config
-endif
 
 # Full clean and removal of all deps. Remove deps first to avoid
 # wasted effort of cleaning deps before nuking them.
@@ -85,4 +73,4 @@ endif
 doc:
 	@./rebar doc skip_deps=true
 
-.PHONY: all compile patch eunit test dialyzer clean allclean distclean doc
+.PHONY: all compile eunit test dialyzer clean allclean distclean doc
