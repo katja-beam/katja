@@ -45,7 +45,8 @@
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-% @doc Starts the querying server.
+% @doc Sends a query string to Riemann. Example queries can be found in the Riemann test suite:
+%      [https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj].
 -spec query(string()) -> {ok, [katja:event()]} | {error, term()}.
 query(Query) ->
   Msg = create_query_message(Query),
