@@ -59,9 +59,11 @@ end_per_suite(_Config) ->
 
 send_event(_Config) ->
   ok = katja:send_event([{service, "katja 1"}, {metric, 9001}]),
+  ok = katja:send_event([{service, <<"katja 1">>}, {metric, 9001}]),
+  ok = katja:send_event([{service, ["kat", $j, $a, " 1"]}, {metric, 9001}]),
   Description = lists:flatten(lists:duplicate(4096, "abcd")),
   ok = katja:send_event([{service, "katja 1"}, {metric, 9001}, {description, Description}]),
-  ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {attributes, [{"foo", "bar"}]}]).
+  ok = katja:send_event([{service, "katja 1"}, {metric, 9002}, {attributes, [{"foo", "bar"}]}]).
 
 send_events(_Config) ->
   Description = lists:flatten(lists:duplicate(4096, "abcd")),
@@ -84,7 +86,12 @@ send_entities(_Config) ->
   ok = katja:send_entities([{states, [State, State]}, {events, [Event, Event]}]).
 
 query(_Config) ->
-  {ok, [ServiceEvent]} = katja:query("service = \"katja 1\""),
+  ok = katja:send_event([{service, "katja 2"}, {metric, 9001}, {tags, ["t1"]}]),
+  {ok, [ServiceEvent]} = katja:query("service = \"katja 2\" and tagged \"t1\""),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
-  {ok, [AttrEvent]} = katja:query("service = \"katja 2\""),
-  {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent).
+  ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {tags, ["t2"]}, {attributes, [{"foo", "bar"}]}]),
+  {ok, [AttrEvent]} = katja:query("service = \"katja 2\" and tagged \"t2\""),
+  {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent),
+  ok = katja:send_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, [<<"t3">>]}]),
+  {ok, [IolistEvent]} = katja:query("service = \"katja 2\" and tagged \"t3\""),
+  {metric, 9001} = lists:keyfind(metric, 1, IolistEvent).

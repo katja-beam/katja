@@ -18,13 +18,13 @@
 -include("katja_types.hrl").
 
 -type riemann_time() :: {time, non_neg_integer()}.
--type riemann_state() :: {state, string()}.
--type riemann_service() :: {service, string()}.
--type riemann_host() :: {host, string()}.
--type riemann_description() :: {description, string()}.
--type riemann_tags() :: {tags, [string()]}.
+-type riemann_state() :: {state, iolist()}.
+-type riemann_service() :: {service, iolist()}.
+-type riemann_host() :: {host, iolist()}.
+-type riemann_description() :: {description, iolist()}.
+-type riemann_tags() :: {tags, [iolist()]}.
 -type riemann_ttl() :: {ttl, float()}.
--type riemann_attributes() :: {attributes, [{string(), string()}]}.
+-type riemann_attributes() :: {attributes, [{iolist(), iolist()}]}.
 -type riemann_metric() :: {metric, number()}.
 -type riemann_once() :: {once, boolean()}.
 
