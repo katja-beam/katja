@@ -21,8 +21,8 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--define(DEFAULT_HOST, {ok, "127.0.0.1"}).
--define(DEFAULT_PORT, {ok, 5555}).
+-define(DEFAULT_HOST, "127.0.0.1").
+-define(DEFAULT_PORT, 5555).
 -define(TCP_MIN_SIZE, 16385).
 
 -record(connection_state, {
@@ -58,8 +58,8 @@
 %      Port: 5555
 -spec connect() -> {ok, state()} | {error, term()}.
 connect() ->
-  {ok, Host} = application:get_env(katja, host, ?DEFAULT_HOST),
-  {ok, Port} = application:get_env(katja, port, ?DEFAULT_PORT),
+  Host = application:get_env(katja, host, ?DEFAULT_HOST),
+  Port = application:get_env(katja, port, ?DEFAULT_PORT),
   connect(Host, Port).
 
 % @doc Tries to connect to Riemann via UDP and TCP using the specified <em>Host</em> and <em>Port</em>.
@@ -78,8 +78,8 @@ connect(Host, Port) ->
 %      Port: 5555
 -spec connect_udp() -> {ok, state()} | {error, term()}.
 connect_udp() ->
-  {ok, Host} = application:get_env(katja, host, ?DEFAULT_HOST),
-  {ok, Port} = application:get_env(katja, port, ?DEFAULT_PORT),
+  Host = application:get_env(katja, host, ?DEFAULT_HOST),
+  Port = application:get_env(katja, port, ?DEFAULT_PORT),
   connect_udp(Host, Port).
 
 % @doc Tries to connect to Riemann via UDP using the specified <em>Host</em> and <em>Port</em>.
@@ -95,8 +95,8 @@ connect_udp(Host, Port) ->
 %      Port: 5555
 -spec connect_tcp() -> {ok, state()} | {error, term()}.
 connect_tcp() ->
-  {ok, Host} = application:get_env(katja, host, ?DEFAULT_HOST),
-  {ok, Port} = application:get_env(katja, port, ?DEFAULT_PORT),
+  Host = application:get_env(katja, host, ?DEFAULT_HOST),
+  Port = application:get_env(katja, port, ?DEFAULT_PORT),
   connect_tcp(Host, Port).
 
 % @doc Tries to connect to Riemann via TCP using the specified <em>Host</em> and <em>Port</em>.
