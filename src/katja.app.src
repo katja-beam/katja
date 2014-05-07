@@ -1,6 +1,6 @@
 {application, katja, [
   {description, "Erlang client for the Riemann network monitoring system."},
-  {vsn, "0.1"},
+  {vsn, "0.1.1"},
   {modules, []},
   {registered, [
     katja_sup,
