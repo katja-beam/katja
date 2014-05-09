@@ -10,8 +10,8 @@
 %
 % @hidden
 % @author Daniel Kempkens <daniel@kempkens.io>
-% @copyright 2014 Daniel Kempkens
-% @version 1.0
+% @copyright {@years} Daniel Kempkens
+% @version {@version}
 % @doc Supervisor of the Katja application.
 
 -module(katja_sup).

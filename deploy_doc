@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+version=`cat rebar.config | grep version | ruby -e 'puts gets.scan(/\d+\.\d+\.\d+/).first'`
+
+echo "=== Generating documentation ($version)"
+make doc
+
+echo "=== Syncing files"
+rsync -avz --no-o --no-g -e ssh --chmod=og=r -p --delete --exclude '*.edoc' --exclude 'edoc-info' doc/ kempkens:/var/www/nifoc/katja/$version
+
+echo "=== Changing permissions"
+ssh kempkens chown -R www-data:www-data /var/www/nifoc/katja/$version

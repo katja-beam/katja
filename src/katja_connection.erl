@@ -9,8 +9,8 @@
 % NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %
 % @author Daniel Kempkens <daniel@kempkens.io>
-% @copyright 2014 Daniel Kempkens
-% @version 1.0
+% @copyright {@years} Daniel Kempkens
+% @version {@version}
 % @doc Handles connections to Riemann.
 
 -module(katja_connection).
@@ -51,18 +51,18 @@
 
 % API
 
-% @doc Tries to connect to Riemann via UDP and TCP.<br />
-%      <em>Host</em> and <em>Port</em> are read from the application configuration.<br />
-%      Defaults:<br />
-%      Host: 127.0.0.1<br />
-%      Port: 5555
+% @doc Tries to connect to Riemann via UDP and TCP. Delegates to {@link connect/2}.<br />
+%      `Host' and `Port' are read from the application configuration.<br /><br />
+%      <strong>Defaults</strong><br />
+%      `Host': 127.0.0.1<br />
+%      `Port': 5555
 -spec connect() -> {ok, state()} | {error, term()}.
 connect() ->
   Host = application:get_env(katja, host, ?DEFAULT_HOST),
   Port = application:get_env(katja, port, ?DEFAULT_PORT),
   connect(Host, Port).
 
-% @doc Tries to connect to Riemann via UDP and TCP using the specified <em>Host</em> and <em>Port</em>.
+% @doc Tries to connect to Riemann via UDP and TCP using the specified `Host' and `Port'.
 -spec connect(string(), pos_integer()) -> {ok, state()} | {error, term()}.
 connect(Host, Port) ->
   State = #connection_state{host=Host, port=Port},
@@ -71,41 +71,42 @@ connect(Host, Port) ->
     {error, _Reason}=E -> E
   end.
 
-% @doc Tries to connect to Riemann via UDP only.<br />
-%      <em>Host</em> and <em>Port</em> are read from the application configuration.<br />
-%      Defaults:<br />
-%      Host: 127.0.0.1<br />
-%      Port: 5555
+% @doc Tries to connect to Riemann via UDP only. Delegates to {@link connect_udp/2}.<br />
+%      `Host' and `Port' are read from the application configuration.<br /><br />
+%      <strong>Defaults</strong><br />
+%      `Host': 127.0.0.1<br />
+%      `Port': 5555
 -spec connect_udp() -> {ok, state()} | {error, term()}.
 connect_udp() ->
   Host = application:get_env(katja, host, ?DEFAULT_HOST),
   Port = application:get_env(katja, port, ?DEFAULT_PORT),
   connect_udp(Host, Port).
 
-% @doc Tries to connect to Riemann via UDP using the specified <em>Host</em> and <em>Port</em>.
+% @doc Tries to connect to Riemann via UDP using the specified `Host' and `Port'.
 -spec connect_udp(string(), pos_integer()) -> {ok, state()} | {error, term()}.
 connect_udp(Host, Port) ->
   State = #connection_state{host=Host, port=Port},
   maybe_connect_udp(State).
 
-% @doc Tries to connect to Riemann via TCP only.<br />
-%      <em>Host</em> and <em>Port</em> are read from the application configuration.<br />
-%      Defaults:<br />
-%      Host: 127.0.0.1<br />
-%      Port: 5555
+% @doc Tries to connect to Riemann via TCP only. Delegates to {@link connect_tcp/2}.<br />
+%      `Host' and `Port' are read from the application configuration.<br /><br />
+%      <strong>Defaults</strong><br />
+%      `Host': 127.0.0.1<br />
+%      `Port': 5555
 -spec connect_tcp() -> {ok, state()} | {error, term()}.
 connect_tcp() ->
   Host = application:get_env(katja, host, ?DEFAULT_HOST),
   Port = application:get_env(katja, port, ?DEFAULT_PORT),
   connect_tcp(Host, Port).
 
-% @doc Tries to connect to Riemann via TCP using the specified <em>Host</em> and <em>Port</em>.
+% @doc Tries to connect to Riemann via TCP using the specified `Host' and `Port'.
 -spec connect_tcp(string(), pos_integer()) -> {ok, state()} | {error, term()}.
 connect_tcp(Host, Port) ->
   State = #connection_state{host=Host, port=Port},
   maybe_connect_tcp(State).
 
-% @doc Disconnects all connected sockets from Riemann.
+% @doc Disconnects all connected sockets from Riemann.<br />
+%      This method detects which sockets actually exist and only disconnects the ones that do.
 -spec disconnect(state()) -> ok.
 disconnect(#connection_state{udp_socket=undefined, tcp_socket=undefined}) -> ok;
 disconnect(#connection_state{udp_socket=Socket, tcp_socket=undefined}) -> gen_udp:close(Socket);
@@ -114,7 +115,7 @@ disconnect(#connection_state{udp_socket=UdpSocket, tcp_socket=TcpSocket}) ->
   ok = gen_udp:close(UdpSocket),
   gen_tcp:close(TcpSocket).
 
-% @doc Delegates to {@link send_message/3}. <em>Type</em> is detected based on the size of the message.
+% @doc Delegates to {@link send_message/3}. `Type' is detected based on the size of the message.
 -spec send_message(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
 send_message(Msg, State) ->
   Type = send_message_transport(Msg),

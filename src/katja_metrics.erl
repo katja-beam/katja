@@ -9,9 +9,9 @@
 % NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %
 % @author Daniel Kempkens <daniel@kempkens.io>
-% @copyright 2014 Daniel Kempkens
-% @version 1.0
-% @doc The <em>katja_metrics</em> module is responsible for sending metrics to Riemann.
+% @copyright {@years} Daniel Kempkens
+% @version {@version}
+% @doc The `katja_metrics' module is responsible for sending metrics to Riemann.
 
 -module(katja_metrics).
 -behaviour(gen_server).
@@ -44,24 +44,30 @@
 
 % API
 
-% @doc Starts the metrics server.
+% @doc Starts the metrics server process.
 -spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-% @doc Sends an event to Riemann.
+% @doc Sends an event to Riemann.<br />
+%      Converting `Data' to a format that can be serialized happens inside the process
+%      calling this function.
 -spec send_event(katja:event()) -> ok | {error, term()}.
 send_event(Data) ->
   Event = create_event(Data),
   gen_server:call(?MODULE, {send_message, event, Event}).
 
-% @doc Sends a state to Riemann.
+% @doc Sends a state to Riemann.<br />
+%      Converting `Data' to a format that can be serialized happens inside the process
+%      calling this function.
 -spec send_state(katja:event()) -> ok | {error, term()}.
 send_state(Data) ->
   State = create_state(Data),
   gen_server:call(?MODULE, {send_message, state, State}).
 
-% @doc Sends multiple entities (events and/or states) to Riemann.
+% @doc Sends multiple entities (events and/or states) to Riemann.<br />
+%      Converting the `states' and `events' (inside the `Data' parameter) to a format that
+%      can be serialized happens inside the process calling this function.
 -spec send_entities(katja:entities()) -> ok | {error, term()}.
 send_entities(Data) ->
   StateEntities = case lists:keyfind(states, 1, Data) of

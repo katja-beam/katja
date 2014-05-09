@@ -10,9 +10,9 @@
 %
 % @hidden
 % @author Daniel Kempkens <daniel@kempkens.io>
-% @copyright 2014 Daniel Kempkens
-% @version 1.0
-% @doc Module for the Katja application.
+% @copyright {@years} Daniel Kempkens
+% @version {@version}
+% @doc Module for the Katja application behaviour.
 
 -module(katja_app).
 -behaviour(application).

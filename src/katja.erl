@@ -9,9 +9,11 @@
 % NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %
 % @author Daniel Kempkens <daniel@kempkens.io>
-% @copyright 2014 Daniel Kempkens
-% @version 1.0
-% @doc This is the main module of the Katja application. It provides the public API.
+% @copyright {@years} Daniel Kempkens
+% @version {@version}
+% @doc This is the main module of the Katja application: It provides the public API.<br />
+%      While it is possible to use `katja_metrics' and `katja_queries' directly, the recommended way is to use the functions defined
+%      in this module instead.
 
 -module(katja).
 
@@ -57,7 +59,7 @@
 
 % API
 
-% @doc Delegates to {@link katja_metrics:send_event/1}.
+% @doc Sends a single event to Riemann. Delegates to {@link katja_metrics:send_event/1}.
 -spec send_event(event()) -> ok | {error, term()}.
 send_event(Data) ->
   katja_metrics:send_event(Data).
@@ -67,7 +69,7 @@ send_event(Data) ->
 send_events(Data) ->
   send_entities([{events, Data}]).
 
-% @doc Delegates to {@link katja_metrics:send_state/1}.
+% @doc Sends a single state to Riemann. Delegates to {@link katja_metrics:send_state/1}.
 -spec send_state(state()) -> ok | {error, term()}.
 send_state(Data) ->
   katja_metrics:send_state(Data).

@@ -9,9 +9,15 @@
 % NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 %
 % @author Daniel Kempkens <daniel@kempkens.io>
-% @copyright 2014 Daniel Kempkens
-% @version 1.0
-% @doc The <em>katja_queries</em> module is responsible for querying Riemann.
+% @copyright {@years} Daniel Kempkens
+% @version {@version}
+% @doc The `katja_queries' module is responsible for querying Riemann.<br />
+%      Riemann currently does not provide real documentation on how to write queries, but there are a couple of resources
+%      that can help you get started with writing them:
+%      <ul>
+%        <li><a href="https://github.com/aphyr/riemann/blob/master/src/riemann/Query.g">Grammar</a></li>
+%        <li><a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj">Test Suite</a></li>
+%      </ul>
 
 -module(katja_queries).
 -behaviour(gen_server).
@@ -40,13 +46,14 @@
 
 % API
 
-% @doc Starts the querying server.
+% @doc Starts the querying server process.
 -spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-% @doc Sends a query string to Riemann. Example queries can be found in the Riemann test suite:
-%      [https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj].
+% @doc Sends a query string to Riemann and returns a list of matching events.<br />
+%      Example queries can be found in the
+%      <a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj">Riemann test suite</a>.
 -spec query(string()) -> {ok, [katja:event()]} | {error, term()}.
 query(Query) ->
   Msg = create_query_message(Query),

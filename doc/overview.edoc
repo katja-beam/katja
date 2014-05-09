@@ -1,0 +1,36 @@
+@title Katja
+@author Daniel Kempkens <daniel@kempkens.io>
+@copyright {@years} Daniel Kempkens
+@version {@version}
+
+@doc
+Katja is a simple <a href="http://riemann.io">Riemann</a> client written in Erlang. The source code can be found on <a href="https://github.com/nifoc/katja">GitHub</a>.
+
+<a href="https://travis-ci.org/nifoc/katja"><img src="https://travis-ci.org/nifoc/katja.png" /></a>
+
+The public API of Katja can be found in the {@link katja} module.
+
+The default configuration looks like this:
+
+<pre><code>[
+  {katja, [
+    {host, "127.0.0.1"},
+    {port, 5555}
+  ]}
+].</code></pre>
+
+<h2>License</h2>
+
+<pre>Copyright (c) 2014, Daniel Kempkens ``<daniel@kempkens.io>''
+
+Permission to use, copy, modify, and/or distribute this software for any purpose
+with or without fee is hereby granted, provided that the above copyright notice
+and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+THIS SOFTWARE.</pre>

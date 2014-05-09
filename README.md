@@ -75,6 +75,7 @@ A query returns a list of events. Events are in the format that you specify when
 
 ## Resources
 
+* [Generated EDoc](http://katja.nifoc.pw/0.1.1/) ([All Versions](http://katja.nifoc.pw))
 * [Katja: Riemann Client Written In Erlang](https://blog.kempkens.io/posts/katja-riemann-client-written-in-erlang/)
 
 ## License

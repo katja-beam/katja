@@ -2,7 +2,8 @@
 .eunit/
 .rebar/
 deps/
-doc/
+doc/*
+!doc/overview.edoc
 ebin/
 logs/
 erl_crash.dump
