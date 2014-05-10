@@ -154,7 +154,11 @@ event_to_proplist(Event) ->
   Event2 = lists:zip(record_info(fields, riemannpb_event), tl(tuple_to_list(Event))),
   Event3 = lists:filter(fun({_Key, Value}) -> Value =/= undefined andalso Value =/= [] end, Event2),
   Event4 = case Event#riemannpb_event.metric_sint64 of
-    undefined -> [{metric, Event#riemannpb_event.metric_f}|Event3];
+    undefined ->
+      case Event#riemannpb_event.metric_f of
+        undefined -> Event3;
+        Float -> [{metric, Float}|Event3]
+      end;
     Int -> [{metric, Int}|Event3]
   end,
   Event5 = case Event#riemannpb_event.attributes of
@@ -182,5 +186,7 @@ create_query_string_test() ->
 
 event_to_proplist_test() ->
   ?assertEqual([{metric, 1}, {service, "katja"}], event_to_proplist(#riemannpb_event{service="katja", metric_f=1.0, metric_sint64=1})),
-  ?assertEqual([{metric, 1.0}, {service, "katja"}], event_to_proplist(#riemannpb_event{service="katja", metric_f=1.0, metric_d=1.0})).
+  ?assertEqual([{metric, 1.0}, {service, "katja"}], event_to_proplist(#riemannpb_event{service="katja", metric_f=1.0, metric_d=1.0})),
+  ?assertEqual([{service, "katja"}, {attributes, [{"foo", "bar"}]}],
+               event_to_proplist(#riemannpb_event{service="katja", attributes=[#riemannpb_attribute{key="foo", value="bar"}]})).
 -endif.
