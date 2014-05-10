@@ -74,4 +74,8 @@ doc:
 	@rm -rf ./doc/*.html ./doc/edoc-info ./doc/erlang.png ./doc/stylesheet.css
 	@./rebar doc skip_deps=true
 
-.PHONY: all compile eunit test dialyzer clean allclean distclean doc
+# Upload generated documentation
+deploydoc: doc
+	@./deploy_doc
+
+.PHONY: all compile eunit test dialyzer clean allclean distclean doc deploydoc
