@@ -28,10 +28,13 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-define(EVENT_FIELDS, [time, state, service, host, description, tags, ttl, metric]).
+
 % API
 -export([
   start_link/0,
-  query/1
+  query/1,
+  query_event/1
 ]).
 
 % gen_server
@@ -54,10 +57,18 @@ start_link() ->
 % @doc Sends a query string to Riemann and returns a list of matching events.<br />
 %      Example queries can be found in the
 %      <a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj">Riemann test suite</a>.
--spec query(string()) -> {ok, [katja:event()]} | {error, term()}.
+-spec query(iolist()) -> {ok, [katja:event()]} | {error, term()}.
 query(Query) ->
   Msg = create_query_message(Query),
   gen_server:call(?MODULE, {query, Msg}).
+
+% @doc Takes an event and transforms it into a query string. The generated query string is passed to {@link query/1}.<br />
+%      Querying `attributes' is currently not supported, because Riemann itself does not provide a way to query events
+%      based on `attributes'.
+-spec query_event(katja:event()) -> {ok, [katja:event()]} | {error, term()}.
+query_event(Event) ->
+  Query = create_query_string(Event),
+  query(Query).
 
 % gen_server
 
@@ -94,11 +105,36 @@ code_change(_OldVsn, State, _Extra) ->
 
 % Private
 
--spec create_query_message(string()) -> riemannpb_message().
+-spec create_query_message(iolist()) -> riemannpb_message().
 create_query_message(Query) ->
   #riemannpb_msg{
      query=#riemannpb_query{string=Query}
   }.
+
+-spec create_query_string(katja:event()) -> iolist().
+create_query_string(Event) ->
+  Query = lists:foldr(fun(K, Q) ->
+    case lists:keyfind(K, 1, Event) of
+      {K, V} ->
+        Q2 = add_query_field(K, V, Q),
+        [" and " | Q2];
+      false -> Q
+    end
+  end, [], ?EVENT_FIELDS),
+  tl(Query).
+
+-spec add_query_field(atom(), term(), iolist()) -> iolist().
+add_query_field(time, V, Q) -> ["time = ", io_lib:format("~p", [V]) | Q];
+add_query_field(state, V, Q) -> ["state = ", "\"", V, "\"" | Q];
+add_query_field(service, V, Q) -> ["service = ", "\"", V, "\"" | Q];
+add_query_field(host, V, Q) -> ["host = ", "\"", V, "\"" | Q];
+add_query_field(description, V, Q) -> ["description = ", "\"", V, "\"" | Q];
+add_query_field(tags, V, Q) ->
+  TaggedQuery = ["tagged \"" ++ Tag ++ "\"" || Tag <- V],
+  [string:join(TaggedQuery, " and ") | Q];
+add_query_field(ttl, V, Q) -> ["ttl = ", io_lib:format("~p", [V]) | Q];
+add_query_field(metric, V, Q) when is_integer(V) ->["metric = ", io_lib:format("~p", [V]) | Q];
+add_query_field(metric, V, Q) -> ["metric_f = ", io_lib:format("~p", [V]) | Q].
 
 -spec send_message(riemannpb_message(), katja_connection:state()) -> {{ok, [katja:event()]}, katja_connection:state()} | {{error, term()}, katja_connection:state()}.
 send_message(Msg, State) ->
@@ -134,6 +170,15 @@ event_to_proplist(Event) ->
 -ifdef(TEST).
 create_query_message_test() ->
   ?assertMatch(#riemannpb_msg{query=#riemannpb_query{string="foo"}}, create_query_message("foo")).
+
+create_query_string_test() ->
+  F = fun(V) -> lists:flatten(V) end,
+  ?assertEqual("service = \"katja\"", F(create_query_string([{service, "katja"}]))),
+  ?assertEqual("service = \"katja\" and tagged \"test\"", F(create_query_string([{service, "katja"}, {tags, ["test"]}]))),
+  ?assertEqual("service = \"katja\" and metric = 1", F(create_query_string([{service, "katja"}, {metric, 1}]))),
+  ?assertEqual("service = \"katja\" and metric_f = 1.0", F(create_query_string([{service, "katja"}, {metric, 1.0}]))),
+  ?assertEqual("state = \"testing\" and host = \"erlang\"", F(create_query_string([{state, "testing"}, {host, "erlang"}]))),
+  ?assertEqual("time = 0 and description = \"foobar\" and ttl = 60.0", F(create_query_string([{time, 0}, {ttl, 60.0}, {description, "foobar"}]))).
 
 event_to_proplist_test() ->
   ?assertEqual([{metric, 1}, {service, "katja"}], event_to_proplist(#riemannpb_event{service="katja", metric_f=1.0, metric_sint64=1})),

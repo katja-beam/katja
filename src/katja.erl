@@ -54,7 +54,8 @@
   send_state/1,
   send_states/1,
   send_entities/1,
-  query/1
+  query/1,
+  query_event/1
 ]).
 
 % API
@@ -88,3 +89,8 @@ send_entities(Data) ->
 -spec query(string()) -> {ok, [event()]} | {error, term()}.
 query(Query) ->
   katja_queries:query(Query).
+
+% @doc Delegates to {@link katja_queries:query_event/1}.
+-spec query_event(event()) -> {ok, [event()]} | {error, term()}.
+query_event(Event) ->
+  katja_queries:query_event(Event).
