@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-version=`cat rebar.config | grep version | ruby -e 'puts gets.scan(/\d+\.\d+\.\d+/).first'`
+version=`cat rebar.config | grep version | ruby -e 'puts gets.scan(/\d+\.\d+\.?\d*/).first'`
 
 echo "=== Generating documentation ($version)"
 make doc
