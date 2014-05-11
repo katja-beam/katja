@@ -32,7 +32,8 @@
   send_state/1,
   send_states/1,
   send_entities/1,
-  query/1
+  query/1,
+  query_event/1
 ]).
 
 % Common Test
@@ -44,7 +45,8 @@ all() ->
     send_state,
     send_states,
     send_entities,
-    query
+    query,
+    query_event
   ].
 
 init_per_suite(Config) ->
@@ -86,12 +88,20 @@ send_entities(_Config) ->
   ok = katja:send_entities([{states, [State, State]}, {events, [Event, Event]}]).
 
 query(_Config) ->
-  ok = katja:send_event([{service, "katja 2"}, {metric, 9001}, {tags, ["t1"]}]),
-  {ok, [ServiceEvent]} = katja:query("service = \"katja 2\" and tagged \"t1\""),
+  ok = katja:send_event([{service, "katja 2"}, {metric, 9001}, {tags, ["tq1"]}]),
+  {ok, [ServiceEvent]} = katja:query("service = \"katja 2\" and tagged \"tq1\""),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
-  ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {tags, ["t2"]}, {attributes, [{"foo", "bar"}]}]),
-  {ok, [AttrEvent]} = katja:query("service = \"katja 2\" and tagged \"t2\""),
+  ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {tags, ["tq2"]}, {attributes, [{"foo", "bar"}]}]),
+  {ok, [AttrEvent]} = katja:query("service = \"katja 2\" and tagged \"tq2\""),
   {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent),
-  ok = katja:send_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, [<<"t3">>]}]),
-  {ok, [IolistEvent]} = katja:query("service = \"katja 2\" and tagged \"t3\""),
+  ok = katja:send_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, [<<"tq3">>]}]),
+  {ok, [IolistEvent]} = katja:query("service = \"katja 2\" and tagged \"tq3\""),
+  {metric, 9001} = lists:keyfind(metric, 1, IolistEvent).
+
+query_event(_Config) ->
+  ok = katja:send_event([{service, "katja 2"}, {metric, 9001}, {tags, ["tqe1"]}]),
+  {ok, [ServiceEvent]} = katja:query_event([{service, "katja 2"}, {tags, ["tqe1"]}]),
+  {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
+  ok = katja:send_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, [<<"tq3">>]}]),
+  {ok, [IolistEvent]} = katja:query_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, ["tq3"]}]),
   {metric, 9001} = lists:keyfind(metric, 1, IolistEvent).
