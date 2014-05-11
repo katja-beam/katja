@@ -73,6 +73,14 @@ ok = katja:send_states([State]).
 
 A query returns a list of events. Events are in the format that you specify when sending data to Riemann.
 
+Another way to query Riemann is by using a `katja:event()` and the `katja:query_event/1` method.
+
+```erlang
+{ok, Events} = katja:query_event([{service, "katja demo"}]).
+```
+
+Katja will convert the event to a query string and query Riemann based on the generated string.
+
 ## Resources
 
 * [Generated EDoc](http://katja.nifoc.pw/0.1.1/) ([All Versions](http://katja.nifoc.pw))
