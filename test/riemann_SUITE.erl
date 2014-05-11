@@ -104,4 +104,7 @@ query_event(_Config) ->
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
   ok = katja:send_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, [<<"tq3">>]}]),
   {ok, [IolistEvent]} = katja:query_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, ["tq3"]}]),
-  {metric, 9001} = lists:keyfind(metric, 1, IolistEvent).
+  {metric, 9001} = lists:keyfind(metric, 1, IolistEvent),
+  ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {tags, ["tqe4", "tqe5"]}]),
+  {ok, [MultipleTags]} = katja:query_event([{service, "katja 2"}, {tags, ["tqe4", "tqe5"]}]),
+  {metric, 9002} = lists:keyfind(metric, 1, MultipleTags).
