@@ -64,7 +64,8 @@ query(Query) ->
 
 % @doc Takes an event and transforms it into a query string. The generated query string is passed to {@link query/1}.<br />
 %      Querying `attributes' is currently not supported, because Riemann itself does not provide a way to query events
-%      based on `attributes'.
+%      based on `attributes'.<br />
+%      Converting `Event' to a query string happens inside the process calling this function.
 -spec query_event(katja:event()) -> {ok, [katja:event()]} | {error, term()}.
 query_event(Event) ->
   Query = create_query_string(Event),

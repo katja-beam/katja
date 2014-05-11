@@ -2,6 +2,8 @@
 
 ## 0.2
 
+[Documentation](http://katja.nifoc.pw/0.2/)
+
 * Support for querying Riemann based on a `katja:event()`
 
 ## 0.1.1

@@ -83,7 +83,7 @@ Katja will convert the event to a query string and query Riemann based on the ge
 
 ## Resources
 
-* [Generated EDoc](http://katja.nifoc.pw/0.1.1/) ([All Versions](http://katja.nifoc.pw))
+* [Generated EDoc](http://katja.nifoc.pw/0.2/) ([All Versions](http://katja.nifoc.pw))
 * [Katja: Riemann Client Written In Erlang](https://blog.kempkens.io/posts/katja-riemann-client-written-in-erlang/)
 
 ## License
