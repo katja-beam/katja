@@ -17,34 +17,44 @@
 -module(katja_sup).
 -behaviour(supervisor).
 
-% supervisor
--export([init/1]).
+-define(DEFAULT_POOL, []).
 
 % API
 -export([start_link/0]).
 
 % supervisor
-
-init([]) ->
-  Children = [
-    {katja_metrics,
-      {katja_metrics, start_link, []},
-      permanent,
-      5000,
-      worker,
-      [katja_metrics]
-    },
-    {katja_queries,
-      {katja_queries, start_link, []},
-      permanent,
-      5000,
-      worker,
-      [katja_queries]
-    }
-  ],
-  {ok, {{one_for_one, 5, 10}, Children}}.
+-export([init/1]).
 
 % API
 
 start_link() ->
   supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+
+% supervisor
+
+init([]) ->
+  Pool = application:get_env(katja, pool, ?DEFAULT_POOL),
+  Children = maybe_add_child(katja_metrics, Pool, {katja_metrics,
+    {katja_metrics, start_link, []},
+    permanent,
+    5000,
+    worker,
+    [katja_metrics]
+  }, []),
+  Children2 = maybe_add_child(katja_queries, Pool, {katja_queries,
+    {katja_queries, start_link, []},
+    permanent,
+    5000,
+    worker,
+    [katja_queries]
+  }, Children),
+  {ok, {{one_for_one, 5, 10}, Children2}}.
+
+% Private
+
+-spec maybe_add_child(atom(), [atom()], tuple(), [tuple()]) -> [tuple()].
+maybe_add_child(Child, Pool, Spec, Children) ->
+  case lists:member(Child, Pool) of
+    true -> Children;
+    false -> [Spec | Children]
+  end.
