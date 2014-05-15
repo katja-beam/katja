@@ -15,8 +15,8 @@
 %      Riemann currently does not provide real documentation on how to write queries, but there are a couple of resources
 %      that can help you get started with writing them:
 %      <ul>
-%        <li><a href="https://github.com/aphyr/riemann/blob/master/src/riemann/Query.g">Grammar</a></li>
-%        <li><a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj">Test Suite</a></li>
+%        <li><a href="https://github.com/aphyr/riemann/blob/master/src/riemann/Query.g" target="_blank">Grammar</a></li>
+%        <li><a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj" target="_blank">Test Suite</a></li>
 %      </ul>
 
 -module(katja_queries).
@@ -56,7 +56,7 @@ start_link() ->
 
 % @doc Sends a query string to Riemann and returns a list of matching events.<br />
 %      Example queries can be found in the
-%      <a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj">Riemann test suite</a>.
+%      <a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj" target="_blank">Riemann test suite</a>.
 -spec query(iolist()) -> {ok, [katja:event()]} | {error, term()}.
 query(Query) ->
   Msg = create_query_message(Query),

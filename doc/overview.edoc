@@ -4,9 +4,9 @@
 @version {@version}
 
 @doc
-Katja is a simple <a href="http://riemann.io">Riemann</a> client written in Erlang. The source code can be found on <a href="https://github.com/nifoc/katja">GitHub</a>.
+Katja is a simple <a href="http://riemann.io" target="_blank">Riemann</a> client written in Erlang. The source code can be found on <a href="https://github.com/nifoc/katja" target="_blank">GitHub</a>.
 
-<a href="https://travis-ci.org/nifoc/katja"><img src="https://travis-ci.org/nifoc/katja.png" /></a>
+<a href="https://travis-ci.org/nifoc/katja" target="_blank"><img src="https://travis-ci.org/nifoc/katja.png" /></a>
 
 The public API of Katja can be found in the {@link katja} module.
 
@@ -19,7 +19,7 @@ The default configuration looks like this:
   ]}
 ].</code></pre>
 
-<a href="https://github.com/nifoc/katja/blob/master/CHANGELOG.md">Changelog</a>
+<a href="https://github.com/nifoc/katja/blob/master/CHANGELOG.md" target="_blank">Changelog</a>
 
 <h2>License</h2>
 
