@@ -50,7 +50,10 @@ eunit:
 ct:
 	@./rebar skip_deps=true ct -v
 
-test: compile eunit ct
+xref:
+	@./rebar skip_deps=true xref
+
+test: compile xref eunit ct
 
 # Only include local PLT if we have deps that we are going to analyze
 ifeq ($(strip $(DIALYZER_DEPS)),)
@@ -78,4 +81,4 @@ doc:
 deploydoc: doc
 	@./deploy_doc
 
-.PHONY: all compile eunit test dialyzer clean allclean distclean doc deploydoc
+.PHONY: all compile eunit ct xref test dialyzer clean allclean distclean doc deploydoc
