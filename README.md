@@ -15,7 +15,8 @@ This is alpha software. Things might still change in ways that break everything.
 [
   {katja, [
     {host, "127.0.0.1"},
-    {port, 5555}
+    {port, 5555},
+    {pool, []}
   ]}
 ].
 ```
@@ -23,6 +24,8 @@ This is alpha software. Things might still change in ways that break everything.
 **host**: Host Riemann is running on
 
 **port**: Port Riemann is listening on
+
+**pool**: List of processes that should not be started (and supervised) by Katja
 
 ## Examples
 
