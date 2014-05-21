@@ -27,6 +27,7 @@
 % API
 -export([
   start_link/0,
+  start_link/1,
   send_event/1,
   send_state/1,
   send_entities/1
@@ -47,6 +48,11 @@
 % @doc Starts the metrics server process.
 -spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
+  gen_server:start_link(?MODULE, [], []).
+
+% @doc Starts the metrics server process and registers it as `{@module}'.
+-spec start_link(register) -> {ok, pid()} | ignore | {error, term()}.
+start_link(register) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 % @doc Sends an event to Riemann.<br />
