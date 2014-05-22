@@ -34,8 +34,8 @@
 -export([
   start_link/0,
   start_link/1,
-  query/1,
-  query_event/1
+  query/2,
+  query_event/2
 ]).
 
 % gen_server
@@ -63,19 +63,19 @@ start_link(register) ->
 % @doc Sends a query string to Riemann and returns a list of matching events.<br />
 %      Example queries can be found in the
 %      <a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj" target="_blank">Riemann test suite</a>.
--spec query(iolist()) -> {ok, [katja:event()]} | {error, term()}.
-query(Query) ->
+-spec query(pid(), iolist()) -> {ok, [katja:event()]} | {error, term()}.
+query(Pid, Query) ->
   Msg = create_query_message(Query),
-  gen_server:call(?MODULE, {query, Msg}).
+  gen_server:call(Pid, {query, Msg}).
 
 % @doc Takes an event and transforms it into a query string. The generated query string is passed to {@link query/1}.<br />
 %      Querying `attributes' is currently not supported, because Riemann itself does not provide a way to query events
 %      based on `attributes'.<br />
 %      Converting `Event' to a query string happens inside the process calling this function.
--spec query_event(katja:event()) -> {ok, [katja:event()]} | {error, term()}.
-query_event(Event) ->
+-spec query_event(pid(), katja:event()) -> {ok, [katja:event()]} | {error, term()}.
+query_event(Pid, Event) ->
   Query = create_query_string(Event),
-  query(Query).
+  query(Pid, Query).
 
 % gen_server
 

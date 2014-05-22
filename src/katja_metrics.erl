@@ -28,9 +28,9 @@
 -export([
   start_link/0,
   start_link/1,
-  send_event/1,
-  send_state/1,
-  send_entities/1
+  send_event/2,
+  send_state/2,
+  send_entities/2
 ]).
 
 % gen_server
@@ -58,24 +58,24 @@ start_link(register) ->
 % @doc Sends an event to Riemann.<br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
--spec send_event(katja:event()) -> ok | {error, term()}.
-send_event(Data) ->
+-spec send_event(pid(), katja:event()) -> ok | {error, term()}.
+send_event(Pid, Data) ->
   Event = create_event(Data),
-  gen_server:call(?MODULE, {send_message, event, Event}).
+  gen_server:call(Pid, {send_message, event, Event}).
 
 % @doc Sends a state to Riemann.<br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
--spec send_state(katja:event()) -> ok | {error, term()}.
-send_state(Data) ->
+-spec send_state(pid(), katja:event()) -> ok | {error, term()}.
+send_state(Pid, Data) ->
   State = create_state(Data),
-  gen_server:call(?MODULE, {send_message, state, State}).
+  gen_server:call(Pid, {send_message, state, State}).
 
 % @doc Sends multiple entities (events and/or states) to Riemann.<br />
 %      Converting the `states' and `events' (inside the `Data' parameter) to a format that
 %      can be serialized happens inside the process calling this function.
--spec send_entities(katja:entities()) -> ok | {error, term()}.
-send_entities(Data) ->
+-spec send_entities(pid(), katja:entities()) -> ok | {error, term()}.
+send_entities(Pid, Data) ->
   StateEntities = case lists:keyfind(states, 1, Data) of
     {states, States} -> [create_state(S) || S <- States];
     false -> []
@@ -85,7 +85,7 @@ send_entities(Data) ->
     false -> []
   end,
   Entities = StateEntities ++ EventEntities,
-  gen_server:call(?MODULE, {send_message, entities, Entities}).
+  gen_server:call(Pid, {send_message, entities, Entities}).
 
 % gen_server
 

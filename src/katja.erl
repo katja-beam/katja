@@ -50,47 +50,89 @@
 % API
 -export([
   send_event/1,
+  send_event/2,
   send_events/1,
+  send_events/2,
   send_state/1,
+  send_state/2,
   send_states/1,
+  send_states/2,
   send_entities/1,
+  send_entities/2,
   query/1,
-  query_event/1
+  query/2,
+  query_event/1,
+  query_event/2
 ]).
 
 % API
 
-% @doc Sends a single event to Riemann. Delegates to {@link katja_metrics:send_event/1}.
+% @doc Delegates to {@link send_event/2}. `Pid' is set to `katja_metrics'.
 -spec send_event(event()) -> ok | {error, term()}.
 send_event(Data) ->
-  katja_metrics:send_event(Data).
+  send_event(katja_metrics, Data).
 
-% @doc Sends multiple events to Riemann. Simple wrapper around {@link send_entities/1}.
+% @doc Sends a single event to Riemann. Delegates to {@link katja_metrics:send_event/1}.
+-spec send_event(pid(), event()) -> ok | {error, term()}.
+send_event(Pid, Data) ->
+  katja_metrics:send_event(Pid, Data).
+
+% @doc Delegates to {@link send_events/2}. `Pid' is set to `katja_metrics'.
 -spec send_events([event()]) -> ok | {error, term()}.
 send_events(Data) ->
-  send_entities([{events, Data}]).
+  send_events(katja_metrics, Data).
 
-% @doc Sends a single state to Riemann. Delegates to {@link katja_metrics:send_state/1}.
+% @doc Sends multiple events to Riemann. Simple wrapper around {@link send_entities/1}.
+-spec send_events(pid(), [event()]) -> ok | {error, term()}.
+send_events(Pid, Data) ->
+  send_entities(Pid, [{events, Data}]).
+
+% @doc Delegates to {@link send_state/2}. `Pid' is set to `katja_metrics'.
 -spec send_state(state()) -> ok | {error, term()}.
 send_state(Data) ->
-  katja_metrics:send_state(Data).
+  send_state(katja_metrics, Data).
 
-% @doc Sends multiple states to Riemann. Simple wrapper around {@link send_entities/1}.
+% @doc Sends a single state to Riemann. Delegates to {@link katja_metrics:send_state/1}.
+-spec send_state(pid(), state()) -> ok | {error, term()}.
+send_state(Pid, Data) ->
+  katja_metrics:send_state(Pid, Data).
+
+% @doc Delegates to {@link send_states/2}. `Pid' is set to `katja_metrics'.
 -spec send_states([state()]) -> ok | {error, term()}.
 send_states(Data) ->
-  send_entities([{states, Data}]).
+  send_states(katja_metrics, Data).
 
-% @doc Delegates to {@link katja_metrics:send_entities/1}.
+% @doc Sends multiple states to Riemann. Simple wrapper around {@link send_entities/1}.
+-spec send_states(pid(), [state()]) -> ok | {error, term()}.
+send_states(Pid, Data) ->
+  send_entities(Pid, [{states, Data}]).
+
+% @doc Delegates to {@link send_entities/2}. `Pid' is set to `katja_metrics'.
 -spec send_entities(entities()) -> ok | {error, term()}.
 send_entities(Data) ->
-  katja_metrics:send_entities(Data).
+  send_entities(katja_metrics, Data).
 
-% @doc Delegates to {@link katja_queries:query/1}.
+% @doc Delegates to {@link katja_metrics:send_entities/1}.
+-spec send_entities(pid(), entities()) -> ok | {error, term()}.
+send_entities(Pid, Data) ->
+  katja_metrics:send_entities(Pid, Data).
+
+% @doc Delegates to {@link query/2}. `Pid' is set to `katja_queries'.
 -spec query(string()) -> {ok, [event()]} | {error, term()}.
 query(Query) ->
-  katja_queries:query(Query).
+  query(katja_queries, Query).
 
-% @doc Delegates to {@link katja_queries:query_event/1}.
+% @doc Delegates to {@link katja_queries:query/1}.
+-spec query(pid(), string()) -> {ok, [event()]} | {error, term()}.
+query(Pid, Query) ->
+  katja_queries:query(Pid, Query).
+
+% @doc Delegates to {@link query_event/2}. `Pid' is set to `katja_queries'.
 -spec query_event(event()) -> {ok, [event()]} | {error, term()}.
 query_event(Event) ->
-  katja_queries:query_event(Event).
+  query_event(katja_queries, Event).
+
+% @doc Delegates to {@link katja_queries:query_event/1}.
+-spec query_event(pid(), event()) -> {ok, [event()]} | {error, term()}.
+query_event(Pid, Event) ->
+  katja_queries:query_event(Pid, Event).
