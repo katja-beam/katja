@@ -17,6 +17,10 @@
 -module(katja_sup).
 -behaviour(supervisor).
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
+
 -define(DEFAULT_POOL, []).
 
 % API
@@ -58,3 +62,11 @@ maybe_add_child(Child, Pool, Spec, Children) ->
     true -> Children;
     false -> [Spec | Children]
   end.
+
+% Tests (private functions)
+
+-ifdef(TEST).
+maybe_add_child_test() ->
+  ?assertMatch([{foo, bar}], maybe_add_child(test_one, [], {foo, bar}, [])),
+  ?assertEqual([], maybe_add_child(test_two, [test_two], {foo, bar}, [])).
+-endif.
