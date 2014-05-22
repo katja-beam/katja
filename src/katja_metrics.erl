@@ -57,14 +57,14 @@ start_link(register) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 % @doc Stops a metrics server process.
--spec stop(pid()) -> ok.
+-spec stop(katja:process()) -> ok.
 stop(Pid) ->
   gen_server:call(Pid, terminate).
 
 % @doc Sends an event to Riemann.<br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
--spec send_event(pid(), katja:event()) -> ok | {error, term()}.
+-spec send_event(katja:process(), katja:event()) -> ok | {error, term()}.
 send_event(Pid, Data) ->
   Event = create_event(Data),
   gen_server:call(Pid, {send_message, event, Event}).
@@ -72,7 +72,7 @@ send_event(Pid, Data) ->
 % @doc Sends a state to Riemann.<br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
--spec send_state(pid(), katja:event()) -> ok | {error, term()}.
+-spec send_state(katja:process(), katja:event()) -> ok | {error, term()}.
 send_state(Pid, Data) ->
   State = create_state(Data),
   gen_server:call(Pid, {send_message, state, State}).
@@ -80,7 +80,7 @@ send_state(Pid, Data) ->
 % @doc Sends multiple entities (events and/or states) to Riemann.<br />
 %      Converting the `states' and `events' (inside the `Data' parameter) to a format that
 %      can be serialized happens inside the process calling this function.
--spec send_entities(pid(), katja:entities()) -> ok | {error, term()}.
+-spec send_entities(katja:process(), katja:entities()) -> ok | {error, term()}.
 send_entities(Pid, Data) ->
   StateEntities = case lists:keyfind(states, 1, Data) of
     {states, States} -> [create_state(S) || S <- States];
