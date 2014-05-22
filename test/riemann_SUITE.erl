@@ -22,7 +22,9 @@
 -export([
   all/0,
   init_per_suite/1,
-  end_per_suite/1
+  init_per_testcase/2,
+  end_per_suite/1,
+  end_per_testcase/2
 ]).
 
 % Tests
@@ -53,58 +55,89 @@ init_per_suite(Config) ->
   ok = application:start(katja),
   Config.
 
+init_per_testcase(_Test, Config) ->
+  {ok, MPid} = katja_metrics:start_link(),
+  {ok, QPid} = katja_queries:start_link(),
+  [{pid_metrics, MPid}, {pid_queries, QPid} | Config].
+
 end_per_suite(_Config) ->
   ok = application:stop(katja),
   ok.
 
+end_per_testcase(_Test, Config) ->
+  MPid = ?config(pid_metrics, Config),
+  QPid = ?config(pid_queries, Config),
+  ok = katja_metrics:stop(MPid),
+  ok = katja_queries:stop(QPid),
+  ok.
+
 % Tests
 
-send_event(_Config) ->
+send_event(Config) ->
   ok = katja:send_event([{service, "katja 1"}, {metric, 9001}]),
   ok = katja:send_event([{service, <<"katja 1">>}, {metric, 9001}]),
   ok = katja:send_event([{service, ["kat", $j, $a, " 1"]}, {metric, 9001}]),
   Description = lists:flatten(lists:duplicate(4096, "abcd")),
   ok = katja:send_event([{service, "katja 1"}, {metric, 9001}, {description, Description}]),
-  ok = katja:send_event([{service, "katja 1"}, {metric, 9002}, {attributes, [{"foo", "bar"}]}]).
+  ok = katja:send_event([{service, "katja 1"}, {metric, 9002}, {attributes, [{"foo", "bar"}]}]),
+  MPid = ?config(pid_metrics, Config),
+  ok = katja:send_event(MPid, [{service, "katja 1"}, {metric, 9001}]),
+  ok = katja:send_event(MPid, [{service, "katja 1"}, {metric, 9001}, {description, Description}]).
 
-send_events(_Config) ->
+send_events(Config) ->
   Description = lists:flatten(lists:duplicate(4096, "abcd")),
   Event = [{service, "katja 1"}, {metric, 9001}, {description, Description}],
-  ok = katja:send_events([Event, Event]).
+  ok = katja:send_events([Event, Event]),
+  MPid = ?config(pid_metrics, Config),
+  ok = katja:send_events(MPid, [Event, Event]).
 
-send_state(_Config) ->
-  ok = katja:send_state([{service, "katja 1"}, {state, "testing"}]).
+send_state(Config) ->
+  ok = katja:send_state([{service, "katja 1"}, {state, "testing"}]),
+  MPid = ?config(pid_metrics, Config),
+  ok = katja:send_state(MPid, [{service, "katja 1"}, {state, "testing"}]).
 
-send_states(_Config) ->
+send_states(Config) ->
   State = [{service, "katja 1"}, {state, "testing"}],
-  ok = katja:send_states([State, State]).
+  ok = katja:send_states([State, State]),
+  MPid = ?config(pid_metrics, Config),
+  ok = katja:send_states(MPid, [State, State]).
 
-send_entities(_Config) ->
+send_entities(Config) ->
   Description = lists:flatten(lists:duplicate(4096, "abcd")),
   Event = [{service, "katja 1"}, {metric, 9001}, {description, Description}],
   State = [{service, "katja 1"}, {state, "testing"}],
   ok = katja:send_entities([{events, [Event]}]),
   ok = katja:send_entities([{states, [State]}]),
-  ok = katja:send_entities([{states, [State, State]}, {events, [Event, Event]}]).
+  ok = katja:send_entities([{states, [State, State]}, {events, [Event, Event]}]),
+  MPid = ?config(pid_metrics, Config),
+  ok = katja:send_entities(MPid, [{states, [State, State]}, {events, [Event, Event]}]).
 
-query(_Config) ->
+query(Config) ->
+  QPid = ?config(pid_queries, Config),
   ok = katja:send_event([{service, "katja 2"}, {metric, 9001}, {tags, ["tq1"]}]),
   {ok, [ServiceEvent]} = katja:query("service = \"katja 2\" and tagged \"tq1\""),
+  {ok, [ServiceEvent]} = katja:query(QPid, "service = \"katja 2\" and tagged \"tq1\""),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
   ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {tags, ["tq2"]}, {attributes, [{"foo", "bar"}]}]),
   {ok, [AttrEvent]} = katja:query("service = \"katja 2\" and tagged \"tq2\""),
+  {ok, [AttrEvent]} = katja:query(QPid, "service = \"katja 2\" and tagged \"tq2\""),
   {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent),
   ok = katja:send_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, [<<"tq3">>]}]),
   {ok, [IolistEvent]} = katja:query("service = \"katja 2\" and tagged \"tq3\""),
+  {ok, [IolistEvent]} = katja:query(QPid, "service = \"katja 2\" and tagged \"tq3\""),
   {metric, 9001} = lists:keyfind(metric, 1, IolistEvent).
 
-query_event(_Config) ->
+query_event(Config) ->
+  QPid = ?config(pid_queries, Config),
   ok = katja:send_event([{service, "katja 2"}, {metric, 9001}, {tags, ["tqe1"]}]),
   {ok, [ServiceEvent]} = katja:query_event([{service, "katja 2"}, {tags, ["tqe1"]}]),
+  {ok, [ServiceEvent]} = katja:query_event(QPid, [{service, "katja 2"}, {tags, ["tqe1"]}]),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
   ok = katja:send_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, [<<"tq3">>]}]),
   {ok, [IolistEvent]} = katja:query_event([{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, ["tq3"]}]),
+  {ok, [IolistEvent]} = katja:query_event(QPid, [{service, ["kat", [$j], $a, <<" 2">>]}, {metric, 9001}, {tags, ["tq3"]}]),
   {metric, 9001} = lists:keyfind(metric, 1, IolistEvent),
   ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {tags, ["tqe4", "tqe5"]}]),
   {ok, [MultipleTags]} = katja:query_event([{service, "katja 2"}, {tags, ["tqe4", "tqe5"]}]),
+  {ok, [MultipleTags]} = katja:query_event(QPid, [{service, "katja 2"}, {tags, ["tqe4", "tqe5"]}]),
   {metric, 9002} = lists:keyfind(metric, 1, MultipleTags).

@@ -34,6 +34,7 @@
 -export([
   start_link/0,
   start_link/1,
+  stop/1,
   query/2,
   query_event/2
 ]).
@@ -50,15 +51,20 @@
 
 % API
 
-% @doc Starts the querying server process.
+% @doc Starts a querying server process.
 -spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
   gen_server:start_link(?MODULE, [], []).
 
-% @doc Starts the querying server process and registers it as `{@module}'.
+% @doc Starts a querying server process and registers it as `{@module}'.
 -spec start_link(register) -> {ok, pid()} | ignore | {error, term()}.
 start_link(register) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+% @doc Stops a querying server process.
+-spec stop(pid()) -> ok.
+stop(Pid) ->
+  gen_server:call(Pid, terminate).
 
 % @doc Sends a query string to Riemann and returns a list of matching events.<br />
 %      Example queries can be found in the

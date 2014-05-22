@@ -28,6 +28,7 @@
 -export([
   start_link/0,
   start_link/1,
+  stop/1,
   send_event/2,
   send_state/2,
   send_entities/2
@@ -45,15 +46,20 @@
 
 % API
 
-% @doc Starts the metrics server process.
+% @doc Starts a metrics server process.
 -spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
   gen_server:start_link(?MODULE, [], []).
 
-% @doc Starts the metrics server process and registers it as `{@module}'.
+% @doc Starts a metrics server process and registers it as `{@module}'.
 -spec start_link(register) -> {ok, pid()} | ignore | {error, term()}.
 start_link(register) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+% @doc Stops a metrics server process.
+-spec stop(pid()) -> ok.
+stop(Pid) ->
+  gen_server:call(Pid, terminate).
 
 % @doc Sends an event to Riemann.<br />
 %      Converting `Data' to a format that can be serialized happens inside the process
