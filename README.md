@@ -92,7 +92,7 @@ Additionally you can also "turn off" the `katja_metrics` and `katja_queries` pro
 
 ## Resources
 
-* [Generated EDoc](http://katja.nifoc.pw/0.2/) ([All Versions](http://katja.nifoc.pw))
+* [Generated EDoc](http://katja.nifoc.pw/0.3/) ([All Versions](http://katja.nifoc.pw))
 * [Katja: Riemann Client Written In Erlang](https://blog.kempkens.io/posts/katja-riemann-client-written-in-erlang/)
 
 ## License

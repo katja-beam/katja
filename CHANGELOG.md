@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3
+
+[Documentation](http://katja.nifoc.pw/0.3/)
+
+* Pooling support ([Issue #1](https://github.com/nifoc/katja/issues/1))
+
 ## 0.2
 
 [Documentation](http://katja.nifoc.pw/0.2/)
