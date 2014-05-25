@@ -84,6 +84,12 @@ Another way to query Riemann is by using a `katja:event()` and the `katja:query_
 
 Katja will convert the event to a query string and query Riemann based on the generated string.
 
+### Pooling
+
+All the methods mentioned above optionally take a `pid()` as their first argument, enabling Katja to easily work with existing process pool implementations.
+
+Additionally you can also "turn off" the `katja_metrics` and `katja_queries` processes that are automatically started and supervised by adding their names to the `pool` configuration.
+
 ## Resources
 
 * [Generated EDoc](http://katja.nifoc.pw/0.2/) ([All Versions](http://katja.nifoc.pw))
