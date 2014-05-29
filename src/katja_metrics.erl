@@ -150,6 +150,7 @@ create_state(Data) ->
   end, State, [once|?COMMON_FIELDS]).
 
 -spec set_event_field(atom(), term(), riemannpb_event()) -> riemannpb_event().
+set_event_field(time, undefined, E) -> E#riemannpb_event{time=current_timestamp()};
 set_event_field(time, V, E) -> E#riemannpb_event{time=V};
 set_event_field(state, V, E) -> E#riemannpb_event{state=V};
 set_event_field(service, V, E) -> E#riemannpb_event{service=V};
@@ -168,6 +169,7 @@ set_event_field(metric, V, E) when is_integer(V) -> E#riemannpb_event{metric_f =
 set_event_field(metric, V, E) -> E#riemannpb_event{metric_f = V, metric_d = V}.
 
 -spec set_state_field(atom(), term(), riemannpb_state()) -> riemannpb_state().
+set_state_field(time, undefined, S) -> S#riemannpb_state{time=current_timestamp()};
 set_state_field(time, V, S) -> S#riemannpb_state{time=V};
 set_state_field(state, V, S) -> S#riemannpb_state{state=V};
 set_state_field(service, V, S) -> S#riemannpb_state{service=V};
@@ -183,6 +185,11 @@ set_state_field(once, V, S) -> S#riemannpb_state{once=V}.
 default_hostname() ->
   {ok, Host} = inet:gethostname(),
   Host.
+
+-spec current_timestamp() -> pos_integer().
+current_timestamp() ->
+  {MegaSecs, Secs, _MicroSecs} = os:timestamp(),
+  MegaSecs * 1000000 + Secs.
 
 -spec create_message(riemannpb_entity() | [riemannpb_entity()]) -> riemannpb_message().
 create_message(Entity) when not is_list(Entity) ->
