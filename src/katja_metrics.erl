@@ -151,6 +151,7 @@ create_state(Data) ->
 
 -spec set_event_field(atom(), term(), riemannpb_event()) -> riemannpb_event().
 set_event_field(time, undefined, E) -> E#riemannpb_event{time=current_timestamp()};
+set_event_field(time, riemann, E) -> E#riemannpb_event{time=undefined};
 set_event_field(time, V, E) -> E#riemannpb_event{time=V};
 set_event_field(state, V, E) -> E#riemannpb_event{state=V};
 set_event_field(service, V, E) -> E#riemannpb_event{service=V};
@@ -170,6 +171,7 @@ set_event_field(metric, V, E) -> E#riemannpb_event{metric_f = V, metric_d = V}.
 
 -spec set_state_field(atom(), term(), riemannpb_state()) -> riemannpb_state().
 set_state_field(time, undefined, S) -> S#riemannpb_state{time=current_timestamp()};
+set_state_field(time, riemann, S) -> S#riemannpb_state{time=undefined};
 set_state_field(time, V, S) -> S#riemannpb_state{time=V};
 set_state_field(state, V, S) -> S#riemannpb_state{state=V};
 set_state_field(service, V, S) -> S#riemannpb_state{service=V};
@@ -235,7 +237,8 @@ create_event_test() ->
   ?assertMatch(#riemannpb_event{metric_f=1.0, metric_sint64=1}, create_event(?TEST_DATA ++ [{metric, 1}])),
   ?assertMatch(#riemannpb_event{metric_f=2.0, metric_d=2.0}, create_event(?TEST_DATA ++ [{metric, 2.0}])),
   ?assertMatch(#riemannpb_event{ttl=900.1, attributes=[#riemannpb_attribute{key="foo", value="bar"}]},
-               create_event(?TEST_DATA ++ [{ttl, 900.1}, {attributes, [{"foo", "bar"}]}])).
+               create_event(?TEST_DATA ++ [{ttl, 900.1}, {attributes, [{"foo", "bar"}]}])),
+  ?assertMatch(#riemannpb_event{time=undefined}, create_event([{time, riemann}])).
 
 create_state_test() ->
   DefaultHost = default_hostname(),
@@ -243,7 +246,8 @@ create_state_test() ->
   ?assertMatch(#riemannpb_state{time=1, state="online", service="katja", host="localhost", description="katja test", tags=[]},
                create_state(lists:keydelete(tags, 1, ?TEST_DATA))),
   ?assertMatch(#riemannpb_state{time=1, state="online", service="katja", host=DefaultHost, description="katja test", tags=["foo", "bar"]},
-               create_state(lists:keydelete(host, 1, ?TEST_DATA))).
+               create_state(lists:keydelete(host, 1, ?TEST_DATA))),
+  ?assertMatch(#riemannpb_state{time=undefined}, create_state([{time, riemann}])).
 
 create_message_test() ->
   Event = create_event(?TEST_DATA),

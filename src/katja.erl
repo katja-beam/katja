@@ -19,7 +19,7 @@
 
 -include("katja_types.hrl").
 
--type riemann_time() :: {time, non_neg_integer()}.
+-type riemann_time() :: {time, non_neg_integer() | riemann}.
 -type riemann_state() :: {state, iolist()}.
 -type riemann_service() :: {service, iolist()}.
 -type riemann_host() :: {host, iolist()}.
