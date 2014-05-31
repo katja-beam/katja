@@ -22,6 +22,12 @@ The default configuration looks like this:
 
 <a href="https://github.com/nifoc/katja/blob/master/CHANGELOG.md" target="_blank">Changelog</a>
 
+<h2>Related Projects</h2>
+
+<ul>
+  <li><a href="https://github.com/nifoc/katja_vmstats" target="_blank">Katja VM Stats</a> - Easily send information about the Erlang VM to Riemann</li>
+</ul>
+
 <h2>License</h2>
 
 <pre>Copyright (c) 2014, Daniel Kempkens ``<daniel@kempkens.io>''
