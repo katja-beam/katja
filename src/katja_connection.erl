@@ -228,5 +228,5 @@ send_message_transport_test() ->
   ?assertEqual(udp, send_message_transport(binary:part(BinData, 0, byte_size(BinData) - 1))).
 
 decode_message_test() ->
-  ?assertMatch(too_short, decode_message(<<4:32/integer-big, "xxx">>)).
+  ?assertEqual(too_short, decode_message(<<4:32/integer-big, "xxx">>)).
 -endif.

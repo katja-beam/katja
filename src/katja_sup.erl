@@ -67,6 +67,6 @@ maybe_add_child(Child, Pool, Spec, Children) ->
 
 -ifdef(TEST).
 maybe_add_child_test() ->
-  ?assertMatch([{foo, bar}], maybe_add_child(test_one, [], {foo, bar}, [])),
+  ?assertEqual([{foo, bar}], maybe_add_child(test_one, [], {foo, bar}, [])),
   ?assertEqual([], maybe_add_child(test_two, [test_two], {foo, bar}, [])).
 -endif.
