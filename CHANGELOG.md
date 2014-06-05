@@ -4,6 +4,7 @@
 
 * The `time` field (of events and states) now defaults to the local system time
 * "Forcing" Riemann to set the `time` field can be done by setting it to `riemann`
+* A default `host` can be set using the new `defaults` configuration option
 
 ## 0.3
 

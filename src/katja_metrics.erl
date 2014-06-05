@@ -22,6 +22,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-define(DEFAULT_DEFAULTS, []).
 -define(COMMON_FIELDS, [time, state, service, host, description, tags, ttl]).
 
 % API
@@ -185,8 +186,13 @@ set_state_field(once, V, S) -> S#riemannpb_state{once=V}.
 
 -spec default_hostname() -> string().
 default_hostname() ->
-  {ok, Host} = inet:gethostname(),
-  Host.
+  Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
+  case lists:keyfind(host, 1, Defaults) of
+    {host, Host} -> Host;
+    false ->
+      {ok, Host} = inet:gethostname(),
+      Host
+  end.
 
 -spec current_timestamp() -> pos_integer().
 current_timestamp() ->
@@ -260,4 +266,11 @@ create_message_test() ->
                  events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}],
                  states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]
                }, create_message([Event, State])).
+
+default_hostname_test() ->
+  Host = "an.host",
+  ok = application:set_env(katja, defaults, [{host, Host}]),
+  ?assertEqual(Host, default_hostname()),
+  ok = application:unset_env(katja, defaults),
+  ?assertNotEqual(Host, default_hostname()).
 -endif.
