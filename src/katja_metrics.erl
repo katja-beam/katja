@@ -203,12 +203,7 @@ current_timestamp() ->
 create_message(Entity) when not is_list(Entity) ->
   create_message([Entity]);
 create_message(Entities) ->
-  {Events, States} = lists:splitwith(fun(Entity) ->
-    if
-      is_record(Entity, riemannpb_event) -> true;
-      true -> false
-    end
-  end, Entities),
+  {Events, States} = lists:splitwith(fun(Entity) -> is_record(Entity, riemannpb_event) end, Entities),
   #riemannpb_msg{events=Events, states=States}.
 
 -spec send_message(riemannpb_message(), katja_connection:state()) -> {ok, katja_connection:state()} | {{error, term()}, katja_connection:state()}.
