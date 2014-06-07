@@ -140,4 +140,9 @@ query_event(Config) ->
   ok = katja:send_event([{service, "katja 2"}, {metric, 9002}, {tags, ["tqe4", "tqe5"]}]),
   {ok, [MultipleTags]} = katja:query_event([{service, "katja 2"}, {tags, ["tqe4", "tqe5"]}]),
   {ok, [MultipleTags]} = katja:query_event(QPid, [{service, "katja 2"}, {tags, ["tqe4", "tqe5"]}]),
-  {metric, 9002} = lists:keyfind(metric, 1, MultipleTags).
+  {metric, 9002} = lists:keyfind(metric, 1, MultipleTags),
+  Description = lists:flatten(lists:duplicate(4096, "abcd")),
+  ok = katja:send_event([{service, "katja 2"}, {metric, 9001}, {description, Description}, {tags, ["tqe6"]}]),
+  {ok, [LargeEvent]} = katja:query_event([{service, "katja 2"}, {tags, ["tqe6"]}]),
+  {ok, [LargeEvent]} = katja:query_event(QPid, [{service, "katja 2"}, {tags, ["tqe6"]}]),
+  {description, Description} = lists:keyfind(description, 1, LargeEvent).

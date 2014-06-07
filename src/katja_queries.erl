@@ -29,6 +29,7 @@
 -endif.
 
 -define(EVENT_FIELDS, [time, state, service, host, description, tags, ttl, metric]).
+-define(PB_EVENT_FIELDS, [time, state, service, host, description, tags, ttl, attributes, metric]).
 
 % API
 -export([
@@ -163,24 +164,25 @@ send_message(Msg, State) ->
   end.
 
 -spec event_to_proplist(riemannpb_event()) -> katja:event().
-event_to_proplist(Event) ->
-  Event2 = lists:zip(record_info(fields, riemannpb_event), tl(tuple_to_list(Event))),
-  Event3 = lists:filter(fun({_Key, Value}) -> Value =/= undefined andalso Value =/= [] end, Event2),
-  Event4 = case Event#riemannpb_event.metric_sint64 of
-    undefined ->
-      case Event#riemannpb_event.metric_f of
-        undefined -> Event3;
-        Float -> [{metric, Float}|Event3]
-      end;
-    Int -> [{metric, Int}|Event3]
-  end,
-  Event5 = case Event#riemannpb_event.attributes of
-    [] -> Event4;
-    Attrs ->
-      Attrs2 = [{AKey, AVal} || {riemannpb_attribute, AKey, AVal} <- Attrs],
-      lists:keyreplace(attributes, 1, Event4, {attributes, Attrs2})
-  end,
-  lists:foldr(fun(Key, Acc) -> lists:keydelete(Key, 1, Acc) end, Event5, [metric_sint64, metric_f, metric_d]).
+event_to_proplist(PbEvent) ->
+  lists:foldr(fun(Field, Acc) ->
+    set_event_field(Field, PbEvent, Acc)
+  end, [], ?PB_EVENT_FIELDS).
+
+-spec set_event_field(atom(), riemannpb_event(), katja:event()) -> katja:event().
+set_event_field(time, #riemannpb_event{time=V}, E) when V =/= undefined -> [{time, V} | E];
+set_event_field(state, #riemannpb_event{state=V}, E) when V =/= undefined -> [{state, V} | E];
+set_event_field(service, #riemannpb_event{service=V}, E) when V =/= undefined -> [{service, V} | E];
+set_event_field(host, #riemannpb_event{host=V}, E) when V =/= undefined -> [{host, V} | E];
+set_event_field(description, #riemannpb_event{description=V}, E) when V =/= undefined -> [{description, V} | E];
+set_event_field(tags, #riemannpb_event{tags=V}, E) when length(V) > 0 -> [{tags, V} | E];
+set_event_field(ttl, #riemannpb_event{ttl=V}, E) when V =/= undefined -> [{ttl, V} | E];
+set_event_field(attributes, #riemannpb_event{attributes=V}, E) when length(V) > 0 ->
+  Attrs = [{AKey, AVal} || {riemannpb_attribute, AKey, AVal} <- V],
+  [{attributes, Attrs} | E];
+set_event_field(metric, #riemannpb_event{metric_sint64=V}, E) when V =/= undefined -> [{metric, V} | E];
+set_event_field(metric, #riemannpb_event{metric_f=V}, E) when V =/= undefined -> [{metric, V} | E];
+set_event_field(_Field, _PbEvent, Event) -> Event.
 
 % Tests (private functions)
 
@@ -198,8 +200,9 @@ create_query_string_test() ->
   ?assertEqual("time = 0 and description = \"foobar\" and ttl = 60.0", F(create_query_string([{time, 0}, {ttl, 60.0}, {description, "foobar"}]))).
 
 event_to_proplist_test() ->
-  ?assertEqual([{metric, 1}, {service, "katja"}], event_to_proplist(#riemannpb_event{service="katja", metric_f=1.0, metric_sint64=1})),
-  ?assertEqual([{metric, 1.0}, {service, "katja"}], event_to_proplist(#riemannpb_event{service="katja", metric_f=1.0, metric_d=1.0})),
+  ?assertEqual([{service, "katja"}, {metric, 1}], event_to_proplist(#riemannpb_event{service="katja", metric_f=1.0, metric_sint64=1})),
+  ?assertEqual([{service, "katja"}, {metric, 1.0}], event_to_proplist(#riemannpb_event{service="katja", metric_f=1.0, metric_d=1.0})),
+  ?assertEqual([{state, "online"}, {service, "katja"}, {metric, 1}], event_to_proplist(#riemannpb_event{service="katja", state="online", metric_f=1.0, metric_sint64=1})),
   ?assertEqual([{service, "katja"}, {attributes, [{"foo", "bar"}]}],
                event_to_proplist(#riemannpb_event{service="katja", attributes=[#riemannpb_attribute{key="foo", value="bar"}]})).
 -endif.
