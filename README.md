@@ -28,7 +28,7 @@ This is alpha software. Things might still change in ways that break everything.
 
 **pool**: List of processes that should not be started (and supervised) by Katja
 
-**defaults**: Default values for events and states (supported: `host`)
+**defaults**: Property list with default values for events and states (supported: `host`, `tags`)
 
 ## Examples
 

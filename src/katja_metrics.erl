@@ -162,7 +162,7 @@ set_event_field(service, V, E) -> E#riemannpb_event{service=V};
 set_event_field(host, undefined, E) -> E#riemannpb_event{host=default_hostname()};
 set_event_field(host, V, E) -> E#riemannpb_event{host=V};
 set_event_field(description, V, E) -> E#riemannpb_event{description=V};
-set_event_field(tags, undefined, E) -> E#riemannpb_event{tags=[]};
+set_event_field(tags, undefined, E) -> E#riemannpb_event{tags=default_tags()};
 set_event_field(tags, V, E) -> E#riemannpb_event{tags=V};
 set_event_field(ttl, V, E) -> E#riemannpb_event{ttl=V};
 set_event_field(attributes, undefined, E) -> E#riemannpb_event{attributes=[]};
@@ -195,6 +195,14 @@ default_hostname() ->
     false ->
       {ok, Host} = inet:gethostname(),
       Host
+  end.
+
+-spec default_tags() -> string().
+default_tags() ->
+  Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
+  case lists:keyfind(tags, 1, Defaults) of
+    {tags, Tags} -> Tags;
+    false -> []
   end.
 
 -spec current_timestamp() -> pos_integer().
@@ -271,4 +279,11 @@ default_hostname_test() ->
   ?assertEqual(Host, default_hostname()),
   ok = application:unset_env(katja, defaults),
   ?assertNotEqual(Host, default_hostname()).
+
+default_tags_test() ->
+  Tags = ["some", "tags"],
+  ok = application:set_env(katja, defaults, [{tags, Tags}]),
+  ?assertEqual(Tags, default_tags()),
+  ok = application:unset_env(katja, defaults),
+  ?assertEqual([], default_tags()).
 -endif.
