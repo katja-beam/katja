@@ -164,6 +164,7 @@ set_event_field(host, V, E) -> E#riemannpb_event{host=V};
 set_event_field(description, V, E) -> E#riemannpb_event{description=V};
 set_event_field(tags, undefined, E) -> E#riemannpb_event{tags=default_tags()};
 set_event_field(tags, V, E) -> E#riemannpb_event{tags=V};
+set_event_field(ttl, undefined, E) -> E#riemannpb_event{ttl=default_ttl()};
 set_event_field(ttl, V, E) -> E#riemannpb_event{ttl=V};
 set_event_field(attributes, undefined, E) -> E#riemannpb_event{attributes=[]};
 set_event_field(attributes, V, E) ->
@@ -182,12 +183,13 @@ set_state_field(service, V, S) -> S#riemannpb_state{service=V};
 set_state_field(host, undefined, S) -> S#riemannpb_state{host=default_hostname()};
 set_state_field(host, V, S) -> S#riemannpb_state{host=V};
 set_state_field(description, V, S) -> S#riemannpb_state{description=V};
-set_state_field(tags, undefined, S) -> S#riemannpb_state{tags=[]};
+set_state_field(tags, undefined, S) -> S#riemannpb_state{tags=default_tags()};
 set_state_field(tags, V, S) -> S#riemannpb_state{tags=V};
+set_state_field(ttl, undefined, S) -> S#riemannpb_state{ttl=default_ttl()};
 set_state_field(ttl, V, S) -> S#riemannpb_state{ttl=V};
 set_state_field(once, V, S) -> S#riemannpb_state{once=V}.
 
--spec default_hostname() -> string().
+-spec default_hostname() -> iolist().
 default_hostname() ->
   Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
   case lists:keyfind(host, 1, Defaults) of
@@ -197,12 +199,20 @@ default_hostname() ->
       Host
   end.
 
--spec default_tags() -> string().
+-spec default_tags() -> [iolist()].
 default_tags() ->
   Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
   case lists:keyfind(tags, 1, Defaults) of
     {tags, Tags} -> Tags;
     false -> []
+  end.
+
+-spec default_ttl() -> float() | undefined.
+default_ttl() ->
+  Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
+  case lists:keyfind(ttl, 1, Defaults) of
+    {ttl, TTL} -> TTL;
+    false -> undefined
   end.
 
 -spec current_timestamp() -> pos_integer().
@@ -286,4 +296,11 @@ default_tags_test() ->
   ?assertEqual(Tags, default_tags()),
   ok = application:unset_env(katja, defaults),
   ?assertEqual([], default_tags()).
+
+default_ttl_test() ->
+  TTL = 60,
+  ok = application:set_env(katja, defaults, [{ttl, TTL}]),
+  ?assertEqual(TTL, default_ttl()),
+  ok = application:unset_env(katja, defaults),
+  ?assertEqual(undefined, default_ttl()).
 -endif.
