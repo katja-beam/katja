@@ -298,7 +298,7 @@ default_tags_test() ->
   ?assertEqual([], default_tags()).
 
 default_ttl_test() ->
-  TTL = 60,
+  TTL = 60.0,
   ok = application:set_env(katja, defaults, [{ttl, TTL}]),
   ?assertEqual(TTL, default_ttl()),
   ok = application:unset_env(katja, defaults),
