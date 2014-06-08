@@ -63,7 +63,8 @@ stop(Pid) ->
   gen_server:call(Pid, terminate).
 
 % @doc Sends an event to Riemann.<br />
-%      If you do not set the `time' field manually, it will default to the local system time.<br /><br />
+%      If you do not set the `time' field manually, it will default to the local system time.<br />
+%      You can set default values for `host', `tags' and `ttl' using the `defaults' configuration option.<br /><br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
 -spec send_event(katja:process(), katja:event()) -> ok | {error, term()}.
@@ -72,7 +73,8 @@ send_event(Pid, Data) ->
   gen_server:call(Pid, {send_message, event, Event}).
 
 % @doc Sends a state to Riemann.<br />
-%      If you do not set the `time' field manually, it will default to the local system time.<br /><br />
+%      If you do not set the `time' field manually, it will default to the local system time.<br />
+%      You can set default values for `host', `tags' and `ttl' using the `defaults' configuration option.<br /><br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
 -spec send_state(katja:process(), katja:event()) -> ok | {error, term()}.
@@ -81,7 +83,8 @@ send_state(Pid, Data) ->
   gen_server:call(Pid, {send_message, state, State}).
 
 % @doc Sends multiple entities (events and/or states) to Riemann.<br />
-%      If you do not set the `time' field manually, it will default to the local system time.<br /><br />
+%      If you do not set the `time' field manually, it will default to the local system time.<br />
+%      You can set default values for `host', `tags' and `ttl' using the `defaults' configuration option.<br /><br />
 %      Converting the `states' and `events' (inside the `Data' parameter) to a format that
 %      can be serialized happens inside the process calling this function.
 -spec send_entities(katja:process(), katja:entities()) -> ok | {error, term()}.
