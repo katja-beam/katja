@@ -2,6 +2,8 @@
 
 ## 0.4
 
+[Documentation](http://katja.nifoc.pw/0.4/)
+
 * The `time` field (of events and states) now defaults to the local system time
 * "Forcing" Riemann to set the `time` field can be done by setting it to `riemann`
 * A default `host`, default `tags` and `ttl` can be set using the new `defaults` configuration option
