@@ -11,9 +11,9 @@
 % @author Daniel Kempkens <daniel@kempkens.io>
 % @copyright {@years} Daniel Kempkens
 % @version {@version}
-% @doc The `katja_metrics' module is responsible for sending metrics to Riemann.
+% @doc The `katja_writer' module is responsible for sending metrics to Riemann.
 
--module(katja_metrics).
+-module(katja_writer).
 -behaviour(gen_server).
 
 -include("katja_types.hrl").
@@ -47,17 +47,17 @@
 
 % API
 
-% @doc Starts a metrics server process.
+% @doc Starts a writer server process.
 -spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
   gen_server:start_link(?MODULE, [], []).
 
-% @doc Starts a metrics server process and registers it as `{@module}'.
+% @doc Starts a writer server process and registers it as `{@module}'.
 -spec start_link(register) -> {ok, pid()} | ignore | {error, term()}.
 start_link(register) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-% @doc Stops a metrics server process.
+% @doc Stops a writer server process.
 -spec stop(katja:process()) -> ok.
 stop(Pid) ->
   gen_server:call(Pid, terminate).

@@ -11,7 +11,7 @@
 % @author Daniel Kempkens <daniel@kempkens.io>
 % @copyright {@years} Daniel Kempkens
 % @version {@version}
-% @doc The `katja_queries' module is responsible for querying Riemann.<br />
+% @doc The `katja_reader' module is responsible for querying Riemann.<br />
 %      Riemann currently does not provide real documentation on how to write queries, but there are a couple of resources
 %      that can help you get started with writing them:
 %      <ul>
@@ -19,7 +19,7 @@
 %        <li><a href="https://github.com/aphyr/riemann/blob/master/test/riemann/query_test.clj" target="_blank">Test Suite</a></li>
 %      </ul>
 
--module(katja_queries).
+-module(katja_reader).
 -behaviour(gen_server).
 
 -include("katja_types.hrl").

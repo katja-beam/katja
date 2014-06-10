@@ -56,8 +56,8 @@ init_per_suite(Config) ->
   Config.
 
 init_per_testcase(_Test, Config) ->
-  {ok, MPid} = katja_metrics:start_link(),
-  {ok, QPid} = katja_queries:start_link(),
+  {ok, MPid} = katja_writer:start_link(),
+  {ok, QPid} = katja_reader:start_link(),
   [{pid_metrics, MPid}, {pid_queries, QPid} | Config].
 
 end_per_suite(_Config) ->
@@ -67,8 +67,8 @@ end_per_suite(_Config) ->
 end_per_testcase(_Test, Config) ->
   MPid = ?config(pid_metrics, Config),
   QPid = ?config(pid_queries, Config),
-  ok = katja_metrics:stop(MPid),
-  ok = katja_queries:stop(QPid),
+  ok = katja_writer:stop(MPid),
+  ok = katja_reader:stop(QPid),
   ok.
 
 % Tests

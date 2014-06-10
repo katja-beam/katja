@@ -38,19 +38,19 @@ start_link() ->
 
 init([]) ->
   Pool = application:get_env(katja, pool, ?DEFAULT_POOL),
-  Children = maybe_add_child(katja_metrics, Pool, {katja_metrics,
-    {katja_metrics, start_link, [register]},
+  Children = maybe_add_child(katja_writer, Pool, {katja_writer,
+    {katja_writer, start_link, [register]},
     permanent,
     5000,
     worker,
-    [katja_metrics]
+    [katja_writer]
   }, []),
-  Children2 = maybe_add_child(katja_queries, Pool, {katja_queries,
-    {katja_queries, start_link, [register]},
+  Children2 = maybe_add_child(katja_reader, Pool, {katja_reader,
+    {katja_reader, start_link, [register]},
     permanent,
     5000,
     worker,
-    [katja_queries]
+    [katja_reader]
   }, Children),
   {ok, {{one_for_one, 5, 10}, Children2}}.
 

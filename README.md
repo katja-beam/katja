@@ -91,7 +91,7 @@ Katja will convert the event to a query string and query Riemann based on the ge
 
 All the methods mentioned above optionally take a `pid()` as their first argument, enabling Katja to easily work with existing process pool implementations.
 
-Additionally you can also "turn off" the `katja_metrics` and `katja_queries` processes that are automatically started and supervised by adding their names to the `pool` configuration.
+Additionally you can also "turn off" the `katja_writer` and `katja_reader` processes that are automatically started and supervised by adding their names to the `pool` configuration.
 
 ## Resources
 

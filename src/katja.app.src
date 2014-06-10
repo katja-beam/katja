@@ -4,8 +4,8 @@
   {modules, []},
   {registered, [
     katja_sup,
-    katja_metrics,
-    katja_queries
+    katja_writer,
+    katja_reader
   ]},
   {applications, [
     kernel,

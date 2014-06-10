@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5
+
+* Rename `katja_metrics` to `katja_writer` and `katja_queries` to `katja_reader`
+
 ## 0.4
 
 [Documentation](http://katja.nifoc.pw/0.4/)
