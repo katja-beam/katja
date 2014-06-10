@@ -52,17 +52,17 @@
 
 % API
 
-% @doc Starts a querying server process.
+% @doc Starts a reader server process.
 -spec start_link() -> {ok, pid()} | ignore | {error, term()}.
 start_link() ->
   gen_server:start_link(?MODULE, [], []).
 
-% @doc Starts a querying server process and registers it as `{@module}'.
+% @doc Starts a reader server process and registers it as `{@module}'.
 -spec start_link(register) -> {ok, pid()} | ignore | {error, term()}.
 start_link(register) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-% @doc Stops a querying server process.
+% @doc Stops a reader server process.
 -spec stop(katja:process()) -> ok.
 stop(Pid) ->
   gen_server:call(Pid, terminate).
