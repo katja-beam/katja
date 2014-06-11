@@ -97,7 +97,7 @@ Additionally you can also "turn off" the `katja_writer` and `katja_reader` proce
 
 ### Forcing a transport
 
-You can force a message to be send via TCP or UDP. By default, the transport is chosen based on the size of a message. For messages up to 16Kb in size UDP is used, everything larger than that uses TCP. Querying Riemann always uses TCP.
+You can force a message to be send via TCP or UDP. By default, the transport is chosen based on the size of a message. UDP is used for messages up to 16Kb in size, everything larger than that uses TCP. Querying Riemann always uses TCP.
 
 ```erlang
 Event = [{service, "katja demo"}, {metric, 9000.1}],
