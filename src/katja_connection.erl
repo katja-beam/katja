@@ -34,7 +34,12 @@
 
 -opaque state() :: #connection_state{}.
 
--export_type([state/0]).
+-type transport() :: udp | tcp | auto.
+
+-export_type([
+  state/0,
+  transport/0
+]).
 
 % API
 -export([
@@ -45,7 +50,6 @@
   connect_tcp/0,
   connect_tcp/2,
   disconnect/1,
-  send_message/2,
   send_message/3
 ]).
 
@@ -115,14 +119,11 @@ disconnect(#connection_state{udp_socket=UdpSocket, tcp_socket=TcpSocket}) ->
   ok = gen_udp:close(UdpSocket),
   gen_tcp:close(TcpSocket).
 
-% @doc Delegates to {@link send_message/3}. `Type' is detected based on the size of the message.
--spec send_message(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
-send_message(Msg, State) ->
-  Type = send_message_transport(Msg),
-  send_message(Type, Msg, State).
-
 % @doc Sends a message to Riemann via UDP or TCP.
--spec send_message(udp | tcp, binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
+-spec send_message(transport(), binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
+send_message(auto, Msg, State) ->
+  Type = send_message_transport(Msg),
+  send_message(Type, Msg, State);
 send_message(udp, Msg, State) -> send_message_udp(Msg, State);
 send_message(tcp, Msg, State) -> send_message_tcp(Msg, State).
 
@@ -147,7 +148,7 @@ maybe_connect_tcp(#connection_state{host=Host, port=Port}=S) ->
     {error, _Reason}=E -> E
   end.
 
--spec send_message_transport(binary()) -> udp | tcp.
+-spec send_message_transport(binary()) -> transport().
 send_message_transport(Msg) ->
   MsgSize = byte_size(Msg),
   if

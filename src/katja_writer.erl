@@ -30,9 +30,9 @@
   start_link/0,
   start_link/1,
   stop/1,
-  send_event/2,
-  send_state/2,
-  send_entities/2
+  send_event/3,
+  send_state/3,
+  send_entities/3
 ]).
 
 % gen_server
@@ -67,28 +67,28 @@ stop(Pid) ->
 %      You can set default values for `host', `tags' and `ttl' using the `defaults' configuration option.<br /><br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
--spec send_event(katja:process(), katja:event()) -> ok | {error, term()}.
-send_event(Pid, Data) ->
+-spec send_event(katja:process(), katja_connection:transport(), katja:event()) -> ok | {error, term()}.
+send_event(Pid, Transport, Data) ->
   Event = create_event(Data),
-  gen_server:call(Pid, {send_message, event, Event}).
+  gen_server:call(Pid, {send_message, Transport, event, Event}).
 
 % @doc Sends a state to Riemann.<br />
 %      If you do not set the `time' field manually, it will default to the local system time.<br />
 %      You can set default values for `host', `tags' and `ttl' using the `defaults' configuration option.<br /><br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
--spec send_state(katja:process(), katja:event()) -> ok | {error, term()}.
-send_state(Pid, Data) ->
+-spec send_state(katja:process(), katja_connection:transport(), katja:event()) -> ok | {error, term()}.
+send_state(Pid, Transport, Data) ->
   State = create_state(Data),
-  gen_server:call(Pid, {send_message, state, State}).
+  gen_server:call(Pid, {send_message, Transport, state, State}).
 
 % @doc Sends multiple entities (events and/or states) to Riemann.<br />
 %      If you do not set the `time' field manually, it will default to the local system time.<br />
 %      You can set default values for `host', `tags' and `ttl' using the `defaults' configuration option.<br /><br />
 %      Converting the `states' and `events' (inside the `Data' parameter) to a format that
 %      can be serialized happens inside the process calling this function.
--spec send_entities(katja:process(), katja:entities()) -> ok | {error, term()}.
-send_entities(Pid, Data) ->
+-spec send_entities(katja:process(), katja_connection:transport(), katja:entities()) -> ok | {error, term()}.
+send_entities(Pid, Transport, Data) ->
   StateEntities = case lists:keyfind(states, 1, Data) of
     {states, States} -> [create_state(S) || S <- States];
     false -> []
@@ -98,7 +98,7 @@ send_entities(Pid, Data) ->
     false -> []
   end,
   Entities = StateEntities ++ EventEntities,
-  gen_server:call(Pid, {send_message, entities, Entities}).
+  gen_server:call(Pid, {send_message, Transport, entities, Entities}).
 
 % gen_server
 
@@ -108,9 +108,9 @@ init([]) ->
   {ok, State}.
 
 % @hidden
-handle_call({send_message, _Type, Data}, _From, State) ->
+handle_call({send_message, Transport, _Type, Data}, _From, State) ->
   Msg = create_message(Data),
-  {Reply, State2} = send_message(Msg, State),
+  {Reply, State2} = send_message(Transport, Msg, State),
   {reply, Reply, State2};
 handle_call(terminate, _From, State) ->
   {stop, normal, ok, State};
@@ -230,13 +230,13 @@ create_message(Entities) ->
   {Events, States} = lists:splitwith(fun(Entity) -> is_record(Entity, riemannpb_event) end, Entities),
   #riemannpb_msg{events=Events, states=States}.
 
--spec send_message(riemannpb_message(), katja_connection:state()) -> {ok, katja_connection:state()} | {{error, term()}, katja_connection:state()}.
-send_message(Msg, State) ->
+-spec send_message(katja_connection:transport(), riemannpb_message(), katja_connection:state()) -> {ok, katja_connection:state()} | {{error, term()}, katja_connection:state()}.
+send_message(Transport, Msg, State) ->
   Msg2 = katja_pb:encode_riemannpb_msg(Msg),
   BinMsg = iolist_to_binary(Msg2),
-  case katja_connection:send_message(BinMsg, State) of
+  case katja_connection:send_message(Transport, BinMsg, State) of
     {{ok, _RetMsg}, State2} -> {ok, State2};
-    {{error, Reason}, State2} -> {{error, Reason}, State2}
+    {{error, _Reason}, _State2}=E -> E
   end.
 
 % Tests (private functions)
