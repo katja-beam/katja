@@ -91,13 +91,13 @@ Katja will convert the event to a query string and query Riemann based on the ge
 
 All the methods mentioned above optionally take a `katja:process()` as their first argument, enabling Katja to easily work with existing process pool implementations. `katja:process()` is either a `pid()` or one of the two following atoms: `katja_writer`, `katja_reader`.
 
-The `atom()` cases should not be used directly, since `katja:send_event/1`, `katja:send_state/1` etc. default to setting the correct atom value.
+The `atom()` cases should not be used directly, since `katja:send_event/1`, `katja:send_state/1`, `katja:query/1` etc. default to setting the correct atom value.
 
 Additionally you can also "turn off" the `katja_writer` and `katja_reader` processes that are automatically started and supervised by adding their names to the `pool` configuration.
 
 ### Forcing a transport
 
-You can force messages to be send via TCP or UDP. By default, the transport is chosen based on the size of a message.
+You can force a message to be send via TCP or UDP. By default, the transport is chosen based on the size of a message. For messages up to 16Kb in size UDP is used, everything larger than that uses TCP. Querying Riemann always uses TCP.
 
 ```erlang
 Event = [{service, "katja demo"}, {metric, 9000.1}],
