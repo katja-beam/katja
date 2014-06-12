@@ -109,6 +109,8 @@ ok = katja:send_event(katja_writer, tcp, Event).
 
 The first argument to `katja:send_event/3`, `katja:send_events/3`, `katja:send_state/3`, `katja:send_states/3` and `katja:send_entities/3` is a `katja:process()`. If you're using one of these methods and don't use a process pool, it has to be set to `katja_writer`.
 
+If (for example) you always want to send messages via TCP, you can set the `transport` configuration option to `tcp`.
+
 ## Resources
 
 * [Generated EDoc](http://katja.nifoc.pw/0.4/) ([All Versions](http://katja.nifoc.pw))
