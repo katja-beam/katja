@@ -68,7 +68,9 @@ connect() ->
   Port = application:get_env(katja, port, ?DEFAULT_PORT),
   connect(Host, Port).
 
-% @doc Tries to connect to Riemann via UDP and TCP using the specified `Host' and `Port'.
+% @doc Tries to connect to Riemann via UDP and TCP using the specified `Host' and `Port'.<br />
+%      A default message transport can be set using the application configuration. This only affects
+%      entities (events and/or states) that are sent to Riemann, since querying always uses TCP.
 -spec connect(string(), pos_integer()) -> {ok, state()} | {error, term()}.
 connect(Host, Port) ->
   Transport = application:get_env(katja, transport, ?DEFAULT_TRANSPORT),
