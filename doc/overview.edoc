@@ -16,6 +16,7 @@ The default configuration looks like this:
   {katja, [
     {host, "127.0.0.1"},
     {port, 5555},
+    {transport, auto},
     {pool, []},
     {defaults, []}
   ]}

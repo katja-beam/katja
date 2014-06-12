@@ -23,13 +23,15 @@
 
 -define(DEFAULT_HOST, "127.0.0.1").
 -define(DEFAULT_PORT, 5555).
+-define(DEFAULT_TRANSPORT, auto).
 -define(TCP_MIN_SIZE, 16385).
 
 -record(connection_state, {
   tcp_socket = undefined :: gen_tcp:socket() | undefined,
   udp_socket = undefined :: gen_udp:socket() | undefined,
   host = undefined :: string() | undefined,
-  port = undefined :: pos_integer() | undefined
+  port = undefined :: pos_integer() | undefined,
+  transport = undefined :: transport() | undefined
 }).
 
 -opaque state() :: #connection_state{}.
@@ -69,7 +71,8 @@ connect() ->
 % @doc Tries to connect to Riemann via UDP and TCP using the specified `Host' and `Port'.
 -spec connect(string(), pos_integer()) -> {ok, state()} | {error, term()}.
 connect(Host, Port) ->
-  State = #connection_state{host=Host, port=Port},
+  Transport = application:get_env(katja, transport, ?DEFAULT_TRANSPORT),
+  State = #connection_state{host=Host, port=Port, transport=Transport},
   case maybe_connect_udp(State) of
     {ok, State2} -> maybe_connect_tcp(State2);
     {error, _Reason}=E -> E
@@ -89,7 +92,7 @@ connect_udp() ->
 % @doc Tries to connect to Riemann via UDP using the specified `Host' and `Port'.
 -spec connect_udp(string(), pos_integer()) -> {ok, state()} | {error, term()}.
 connect_udp(Host, Port) ->
-  State = #connection_state{host=Host, port=Port},
+  State = #connection_state{host=Host, port=Port, transport=udp},
   maybe_connect_udp(State).
 
 % @doc Tries to connect to Riemann via TCP only. Delegates to {@link connect_tcp/2}.<br />
@@ -106,7 +109,7 @@ connect_tcp() ->
 % @doc Tries to connect to Riemann via TCP using the specified `Host' and `Port'.
 -spec connect_tcp(string(), pos_integer()) -> {ok, state()} | {error, term()}.
 connect_tcp(Host, Port) ->
-  State = #connection_state{host=Host, port=Port},
+  State = #connection_state{host=Host, port=Port, transport=tcp},
   maybe_connect_tcp(State).
 
 % @doc Disconnects all connected sockets from Riemann.<br />
@@ -121,9 +124,11 @@ disconnect(#connection_state{udp_socket=UdpSocket, tcp_socket=TcpSocket}) ->
 
 % @doc Sends a message to Riemann via UDP or TCP.
 -spec send_message(transport(), binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
-send_message(auto, Msg, State) ->
+send_message(auto, Msg, #connection_state{transport=udp}=S) -> send_message_udp(Msg, S);
+send_message(auto, Msg, #connection_state{transport=tcp}=S) -> send_message_tcp(Msg, S);
+send_message(auto, Msg, #connection_state{transport=auto}=S) ->
   Type = send_message_transport(Msg),
-  send_message(Type, Msg, State);
+  send_message(Type, Msg, S);
 send_message(udp, Msg, State) -> send_message_udp(Msg, State);
 send_message(tcp, Msg, State) -> send_message_tcp(Msg, State).
 
