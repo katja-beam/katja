@@ -52,6 +52,7 @@
 
 % API
 -export([
+  start/0,
   send_event/1,
   send_event/2,
   send_event/3,
@@ -74,6 +75,12 @@
 ]).
 
 % API
+
+% @doc Starts the Katja application and all of its dependencies. This is really only meant for usage inside the console.
+-spec start() -> ok.
+start() ->
+  ok = application:start(katja),
+  ok.
 
 % @doc Delegates to {@link send_event/2}. `Pid' is set to `katja_writer'.
 -spec send_event(event()) -> ok | {error, term()}.
