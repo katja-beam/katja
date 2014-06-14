@@ -80,10 +80,10 @@
 send_event(Data) ->
   send_event(katja_writer, Data).
 
-% @doc Delegates to {@link send_event/3}. `Transport' is set to `auto'.
+% @doc Delegates to {@link send_event/3}. `Transport' is set to `config'.
 -spec send_event(process(), event()) -> ok | {error, term()}.
 send_event(Pid, Data) ->
-  send_event(Pid, auto, Data).
+  send_event(Pid, config, Data).
 
 % @doc Sends a single event to Riemann. Delegates to {@link katja_writer:send_event/3}.
 -spec send_event(process(), katja_connection:transport(), event()) -> ok | {error, term()}.
@@ -95,10 +95,10 @@ send_event(Pid, Transport, Data) ->
 send_events(Data) ->
   send_events(katja_writer, Data).
 
-% @doc Delegates to {@link send_events/3}. `Transport' is set to `auto'.
+% @doc Delegates to {@link send_events/3}. `Transport' is set to `config'.
 -spec send_events(process(), [event()]) -> ok | {error, term()}.
 send_events(Pid, Data) ->
-  send_events(Pid, auto, Data).
+  send_events(Pid, config, Data).
 
 % @doc Sends multiple events to Riemann. Simple wrapper around {@link send_entities/3}.
 -spec send_events(process(), katja_connection:transport(), [event()]) -> ok | {error, term()}.
@@ -110,10 +110,10 @@ send_events(Pid, Transport, Data) ->
 send_state(Data) ->
   send_state(katja_writer, Data).
 
-% @doc Delegates to {@link send_state/3}. `Transport' is set to `auto'.
+% @doc Delegates to {@link send_state/3}. `Transport' is set to `config'.
 -spec send_state(process(), state()) -> ok | {error, term()}.
 send_state(Pid, Data) ->
-  send_state(Pid, auto, Data).
+  send_state(Pid, config, Data).
 
 % @doc Sends a single state to Riemann. Delegates to {@link katja_writer:send_state/3}.
 -spec send_state(process(), katja_connection:transport(), state()) -> ok | {error, term()}.
@@ -125,10 +125,10 @@ send_state(Pid, Transport, Data) ->
 send_states(Data) ->
   send_states(katja_writer, Data).
 
-% @doc Delegates to {@link send_states/3}. `Transport' is set to `auto'.
+% @doc Delegates to {@link send_states/3}. `Transport' is set to `config'.
 -spec send_states(process(), [state()]) -> ok | {error, term()}.
 send_states(Pid, Data) ->
-  send_states(Pid, auto, Data).
+  send_states(Pid, config, Data).
 
 % @doc Sends multiple states to Riemann. Simple wrapper around {@link send_entities/3}.
 -spec send_states(process(), katja_connection:transport(), [state()]) -> ok | {error, term()}.
@@ -140,10 +140,10 @@ send_states(Pid, Transport, Data) ->
 send_entities(Data) ->
   send_entities(katja_writer, Data).
 
-% @doc Delegates to {@link send_entities/3}. `Transport' is set to `auto'.
+% @doc Delegates to {@link send_entities/3}. `Transport' is set to `config'.
 -spec send_entities(process(), entities()) -> ok | {error, term()}.
 send_entities(Pid, Data) ->
-  send_entities(Pid, auto, Data).
+  send_entities(Pid, config, Data).
 
 % @doc Sends multiple entities (events and/or states) to Riemann. Delegates to {@link katja_writer:send_entities/3}.
 -spec send_entities(process(), katja_connection:transport(), entities()) -> ok | {error, term()}.

@@ -23,7 +23,7 @@
 
 -define(DEFAULT_HOST, "127.0.0.1").
 -define(DEFAULT_PORT, 5555).
--define(DEFAULT_TRANSPORT, auto).
+-define(DEFAULT_TRANSPORT, detect).
 -define(TCP_MIN_SIZE, 16385).
 
 -record(connection_state, {
@@ -36,7 +36,7 @@
 
 -opaque state() :: #connection_state{}.
 
--type transport() :: udp | tcp | auto.
+-type transport() :: detect | udp | tcp | config.
 
 -export_type([
   state/0,
@@ -124,13 +124,19 @@ disconnect(#connection_state{udp_socket=UdpSocket, tcp_socket=TcpSocket}) ->
   ok = gen_udp:close(UdpSocket),
   gen_tcp:close(TcpSocket).
 
-% @doc Sends a message to Riemann via UDP or TCP.
--spec send_message(transport(), binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
-send_message(auto, Msg, #connection_state{transport=udp}=S) -> send_message_udp(Msg, S);
-send_message(auto, Msg, #connection_state{transport=tcp}=S) -> send_message_tcp(Msg, S);
-send_message(auto, Msg, #connection_state{transport=auto}=S) ->
+% @doc Sends a message to Riemann via UDP or TCP.<br /><br />
+%      `Transport' can be one of the following values:<br />
+%      `config': Uses the `transport' configuration option<br />
+%      `detect': Uses the UDP transport for messages up to 16Kb in size and TCP for everything larger than that<br />
+%      `udp': Send the message via UDP<br />
+%      `tcp': Sends the message via TCP
+-spec send_message(Transport :: transport(), binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
+send_message(config, Msg, #connection_state{transport=udp}=S) -> send_message_udp(Msg, S);
+send_message(config, Msg, #connection_state{transport=tcp}=S) -> send_message_tcp(Msg, S);
+send_message(config, Msg, #connection_state{transport=detect}=S) -> send_message(detect, Msg, S);
+send_message(detect, Msg, State) ->
   Type = send_message_transport(Msg),
-  send_message(Type, Msg, S);
+  send_message(Type, Msg, State);
 send_message(udp, Msg, State) -> send_message_udp(Msg, State);
 send_message(tcp, Msg, State) -> send_message_tcp(Msg, State).
 

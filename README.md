@@ -16,7 +16,7 @@ This is alpha software. Things might still change in ways that break everything.
   {katja, [
     {host, "127.0.0.1"},
     {port, 5555},
-    {transport, auto},
+    {transport, detect},
     {pool, []},
     {defaults, []}
   ]}
@@ -27,7 +27,7 @@ This is alpha software. Things might still change in ways that break everything.
 
 **port**: Port Riemann is listening on
 
-**transport**: The message transport that should be used (supported: `auto`, `udp`, `tcp`)
+**transport**: The message transport that should be used (supported: `detect`, `udp`, `tcp`)
 
 **pool**: List of processes that should not be started (and supervised) by Katja
 
