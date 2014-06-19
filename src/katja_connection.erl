@@ -34,6 +34,8 @@
   transport = undefined :: transport() | undefined
 }).
 
+% Types
+
 -opaque state() :: #connection_state{}.
 
 -type transport() :: detect | udp | tcp | config.
