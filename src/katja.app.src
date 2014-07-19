@@ -9,7 +9,8 @@
   ]},
   {applications, [
     kernel,
-    stdlib
+    stdlib,
+    profobuffs
   ]},
   {mod, {katja_app, []}},
   {env, []}
