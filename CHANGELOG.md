@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+[Documentation](http://katja.nifoc.pw/0.4.1/)
+
+* Make `protobuffs` a runtime dependency (thanks [@robashton](https://github.com/robashton))
+
 ## 0.4
 
 [Documentation](http://katja.nifoc.pw/0.4/)
