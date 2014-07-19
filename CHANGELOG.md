@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+[Documentation](http://katja.nifoc.pw/0.4.2/)
+
+* Fix spelling mistake in `katja.app.src`
+
 ## 0.4.1
 
 [Documentation](http://katja.nifoc.pw/0.4.1/)
