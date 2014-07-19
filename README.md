@@ -113,7 +113,7 @@ If (for example) you always want to send messages via TCP, you can set the `tran
 
 ## Resources
 
-* [Generated EDoc](http://katja.nifoc.pw/0.4.1/) ([All Versions](http://katja.nifoc.pw))
+* [Generated EDoc](http://katja.nifoc.pw/0.4.2/) ([All Versions](http://katja.nifoc.pw))
 * [Katja: Riemann Client Written In Erlang](https://blog.kempkens.io/posts/katja-riemann-client-written-in-erlang/)
 
 ## Related Projects
