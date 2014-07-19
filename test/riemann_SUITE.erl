@@ -56,6 +56,7 @@ all() ->
   ].
 
 init_per_suite(Config) ->
+  ok = application:start(protobuffs),
   ok = application:start(katja),
   Config.
 
@@ -65,6 +66,7 @@ init_per_testcase(_Test, Config) ->
   [{pid_writer, WPid}, {pid_reader, RPid} | Config].
 
 end_per_suite(_Config) ->
+  ok = application:stop(protobuffs),
   ok = application:stop(katja),
   ok.
 

@@ -79,6 +79,7 @@
 % @doc Starts the Katja application and all of its dependencies. This is really only meant for usage inside the console.
 -spec start() -> ok.
 start() ->
+  ok = application:start(protobuffs),
   ok = application:start(katja),
   ok.
 
