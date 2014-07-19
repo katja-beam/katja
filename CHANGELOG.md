@@ -7,6 +7,12 @@
 * A default message transport (affecting only entities that are sent to Riemann) can be set using the `transport` configuration option
 * Add `katja:start/0` to start the Katja application and all of its dependencies
 
+## 0.4.1
+
+[Documentation](http://katja.nifoc.pw/0.4.1/)
+
+* Make `protobuffs` a runtime dependency (thanks [@robashton](https://github.com/robashton))
+
 ## 0.4
 
 [Documentation](http://katja.nifoc.pw/0.4/)
