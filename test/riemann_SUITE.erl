@@ -66,8 +66,8 @@ init_per_testcase(_Test, Config) ->
   [{pid_writer, WPid}, {pid_reader, RPid} | Config].
 
 end_per_suite(_Config) ->
-  ok = application:stop(protobuffs),
   ok = application:stop(katja),
+  ok = application:stop(protobuffs),
   ok.
 
 end_per_testcase(_Test, Config) ->
