@@ -2,6 +2,8 @@
 
 ## 0.5
 
+[Documentation](http://katja.nifoc.pw/0.5/)
+
 * Rename `katja_metrics` to `katja_writer` and `katja_queries` to `katja_reader`
 * `katja:send_event/3`, `katja:send_events/3`, `katja:send_state/3`, `katja:send_states/3` and `katja:send_entities/3` can be used to force a transport (supported: `detect`, `udp`, `tcp`)
 * A default message transport (affecting only entities that are sent to Riemann) can be set using the `transport` configuration option
