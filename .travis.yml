@@ -1,5 +1,6 @@
 language: erlang
 otp_release:
+  - 17.1
   - 17.0
   - R16B03-1
   - R16B03
@@ -8,6 +9,6 @@ otp_release:
 script: make test
 
 install:
-  - URL='http://aphyr.com/riemann/riemann_0.2.5_all.deb'; FILE=`mktemp`; DEBIAN_FRONTEND=noninteractive; wget "$URL" -qO $FILE && sudo dpkg -i $FILE; rm $FILE
+  - URL='http://aphyr.com/riemann/riemann_0.2.6_all.deb'; FILE=`mktemp`; DEBIAN_FRONTEND=noninteractive; wget "$URL" -qO $FILE && sudo dpkg -i $FILE; rm $FILE
 before_script:
   - sudo service riemann start
