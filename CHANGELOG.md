@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6
+
+* Switch from [Rebar](https://github.com/rebar/rebar) to [erlang.mk](https://github.com/ninenines/erlang.mk)
+
 ## 0.5
 
 [Documentation](http://katja.nifoc.pw/0.5/)

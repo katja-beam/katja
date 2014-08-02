@@ -1,6 +1,5 @@
 .DS_Store
-.eunit/
-.rebar/
+.erlang.mk.*
 deps/
 doc/*
 !doc/overview.edoc
