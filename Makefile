@@ -51,7 +51,7 @@ include erlang.mk
 
 clean:: clean-proto
 
-clean-proto:
+clean-proto: $(shell find src -type f -name \*.proto 2>/dev/null)
 	$(gen_verbose) rm -f $(shell find include -type f -name \*_pb.hrl 2>/dev/null)
 
 upload-docs: docs
@@ -59,4 +59,4 @@ upload-docs: docs
 	rsync -avz --no-o --no-g -e ssh --chmod=og=r -p --delete --exclude '*.edoc' --exclude 'edoc-info' doc/ kempkens:/var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION)
 	ssh kempkens chown -R www-data:www-data /var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION)
 
-.PHONY: upload-docs
+.PHONY: clean-proto upload-docs
