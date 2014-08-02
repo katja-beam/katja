@@ -45,9 +45,8 @@ define compile_protobuffs
 	@mv $(proto_name)_pb.hrl include/
 endef
 
-ifneq ($(wildcard src/*.proto),)
-app:: deps
-endif
+# Keep `all' as the default target
+all::
 
 ebin/$(PROJECT).app:: $(shell find src -type f -name \*.proto 2>/dev/null)
 	$(if $(strip $?),$(call compile_protobuffs,$?))
