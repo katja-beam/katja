@@ -34,7 +34,7 @@ proto_verbose = $(proto_verbose_$(V))
 define compile_protobuffs
 	$(proto_verbose) erl -noshell -pa ebin/ $(DEPS_DIR)/protobuffs/ebin/ -eval ' \
 		Compile = fun(F) -> \
-			protobuffs_compile:scan_file(F) \
+			protobuffs_compile:scan_file(F, [{compile_flags, [debug_info]}]) \
 		end, \
 		_ = [Compile(F) || F <- string:tokens("$(1)", " ")], \
 		init:stop()' > /dev/null
