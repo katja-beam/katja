@@ -32,8 +32,10 @@
 -export([
   query/1,
   query_pid/1,
+  query_async/1,
   query_event/1,
-  query_event_pid/1
+  query_event_pid/1,
+  query_event_async/1
 ]).
 
 % Common Test
@@ -42,8 +44,10 @@ all() ->
   [
     query,
     query_pid,
+    query_async,
     query_event,
-    query_event_pid
+    query_event_pid,
+    query_event_async
   ].
 
 init_per_suite(Config) ->
@@ -87,6 +91,13 @@ query_pid(Config) ->
   {ok, [MultiTagEvent]} = katja:query(RPid, "service = \"katja 4\" and tagged \"query3\" and tagged \"query4\""),
   {metric, 9003} = lists:keyfind(metric, 1, MultiTagEvent).
 
+query_async(_Config) ->
+  {ok, Ref} = katja:query_async("service = \"katja 2\" and tagged \"query1\""),
+  receive
+    {Ref, {ok, [ServiceEvent]}} ->
+      {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent)
+  end.
+
 query_event(_Config) ->
   {ok, [ServiceEvent]} = katja:query_event([{service, "katja 2"}, {tags, ["query1"]}]),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
@@ -103,6 +114,13 @@ query_event_pid(Config) ->
   {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent),
   {ok, [MultiTagEvent]} = katja:query_event(RPid, [{service, "katja 4"}, {tags, ["query3", "query4"]}]),
   {metric, 9003} = lists:keyfind(metric, 1, MultiTagEvent).
+
+query_event_async(_Config) ->
+  {ok, Ref} = katja:query_event_async([{service, "katja 2"}, {tags, ["query1"]}]),
+  receive
+    {Ref, {ok, [ServiceEvent]}} ->
+      {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent)
+  end.
 
 % Private
 

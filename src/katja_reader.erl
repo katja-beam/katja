@@ -37,7 +37,9 @@
   start_link/1,
   stop/1,
   query/2,
-  query_event/2
+  query_async/2,
+  query_event/2,
+  query_event_async/2
 ]).
 
 % gen_server
@@ -75,7 +77,15 @@ query(Pid, Query) ->
   Msg = create_query_message(Query),
   gen_server:call(Pid, {query, Msg}).
 
-% @doc Takes an event and transforms it into a query string. The generated query string is passed to {@link query/1}.<br />
+% @doc Sends a query string to Riemann and returns the result asynchronously by sending a message to the caller.
+-spec query_async(katja:process(), iolist()) -> {ok, reference()}.
+query_async(Pid, Query) ->
+  Ref = make_ref(),
+  Msg = create_query_message(Query),
+  ok = gen_server:cast(Pid, {query_async, self(), Ref, Msg}),
+  {ok, Ref}.
+
+% @doc Takes an event and transforms it into a query string. The generated query string is passed to {@link query/2}.<br />
 %      Querying `attributes' is currently not supported, because Riemann itself does not provide a way to query events
 %      based on `attributes'.<br /><br />
 %      Converting `Event' to a query string happens inside the process calling this function.
@@ -83,6 +93,12 @@ query(Pid, Query) ->
 query_event(Pid, Event) ->
   Query = create_query_string(Event),
   query(Pid, Query).
+
+% @doc Takes an event and transforms it into a query string. The generated query string is passed to {@link query_async/2}.
+-spec query_event_async(katja:process(), katja:event()) -> {ok, reference()}.
+query_event_async(Pid, Event) ->
+  Query = create_query_string(Event),
+  query_async(Pid, Query).
 
 % gen_server
 
@@ -101,6 +117,10 @@ handle_call(_Request, _From, State) ->
   {reply, ignored, State}.
 
 % @hidden
+handle_cast({query_async, Pid, Ref, Msg}, State) ->
+  {Reply, State2} = send_message(Msg, State),
+  Pid ! {Ref, Reply},
+  {noreply, State2};
 handle_cast(_Msg, State) ->
   {noreply, State}.
 

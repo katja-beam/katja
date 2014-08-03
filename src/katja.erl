@@ -71,8 +71,12 @@
   send_entities/3,
   query/1,
   query/2,
+  query_async/1,
+  query_async/2,
   query_event/1,
-  query_event/2
+  query_event/2,
+  query_event_async/1,
+  query_event_async/2
 ]).
 
 % API
@@ -176,6 +180,16 @@ query(Query) ->
 query(Pid, Query) ->
   katja_reader:query(Pid, Query).
 
+% @doc Delegates to {@link query_async/2}. `Pid' is set to `katja_reader'.
+-spec query_async(string()) -> {ok, reference()}.
+query_async(Query) ->
+  query_async(katja_reader, Query).
+
+% @doc Delegates to {@link katja_reader:query_async/2}.
+-spec query_async(process(), string()) -> {ok, reference()}.
+query_async(Pid, Query) ->
+  katja_reader:query_async(Pid, Query).
+
 % @doc Delegates to {@link query_event/2}. `Pid' is set to `katja_reader'.
 -spec query_event(event()) -> {ok, [event()]} | {error, term()}.
 query_event(Event) ->
@@ -185,3 +199,13 @@ query_event(Event) ->
 -spec query_event(process(), event()) -> {ok, [event()]} | {error, term()}.
 query_event(Pid, Event) ->
   katja_reader:query_event(Pid, Event).
+
+% @doc Delegates to {@link query_event_async/2}. `Pid' is set to `katja_reader'.
+-spec query_event_async(event()) -> {ok, reference()}.
+query_event_async(Event) ->
+  query_event_async(katja_reader, Event).
+
+% @doc Delegates to {@link katja_reader:query_event_async/2}.
+-spec query_event_async(process(), event()) -> {ok, reference()}.
+query_event_async(Pid, Event) ->
+  katja_reader:query_event_async(Pid, Event).

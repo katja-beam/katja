@@ -3,6 +3,7 @@
 ## 0.6
 
 * Switch from [Rebar](https://github.com/rebar/rebar) to [erlang.mk](https://github.com/ninenines/erlang.mk)
+* Add `katja:query_async/{1,2}` and `katja:query_event_async/{1,2}` to query Riemann asynchronously
 * Add `katja:stop/0` to stop the Katja application and all of its dependencies
 
 ## 0.5
