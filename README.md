@@ -90,6 +90,16 @@ Another way to query Riemann is by using a `katja:event()` and the `katja:query_
 
 Katja will convert the event to a query string and query Riemann based on the generated string.
 
+```erlang
+{ok, Ref} = katja:query_async("service = \"katja demo\""),
+receive
+  {Ref, {ok, Events}} ->
+    % ...
+end.
+```
+
+You can also query Riemann asynchronously using `katja:query_async/{1,2}` and `katja:query_event_async/{1,2}`.
+
 ### Pooling
 
 All the methods mentioned above optionally take a `katja:process()` as their first argument, enabling Katja to easily work with existing process pool implementations. `katja:process()` is either a `pid()` or one of the two following atoms: `katja_writer`, `katja_reader`.
