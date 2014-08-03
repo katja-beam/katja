@@ -2,5 +2,6 @@
 {excl_mods, katja, [
   katja_pb,
   eunit_SUITE,
-  riemann_SUITE
+  writer_SUITE,
+  reader_SUITE
 ]}.

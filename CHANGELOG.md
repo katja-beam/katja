@@ -3,6 +3,7 @@
 ## 0.6
 
 * Switch from [Rebar](https://github.com/rebar/rebar) to [erlang.mk](https://github.com/ninenines/erlang.mk)
+* Add `katja:stop/0` to stop the Katja application and all of its dependencies
 
 ## 0.5
 

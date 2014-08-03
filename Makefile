@@ -15,7 +15,7 @@ TEST_ERLC_OPTS ?= +debug_info +warn_bif_clash +warn_deprecated_function +warn_de
 				+warn_export_all +warn_export_vars +warn_shadow_vars +warn_obsolete_guard +warn_unused_import \
 				+warn_unused_function +warn_unused_record +warn_unused_vars +warnings_as_errors
 
-CT_SUITES = eunit riemann
+CT_SUITES = eunit writer reader
 CT_OPTS = -ct_hooks nifoc_ct_hook []
 
 ifneq ($(USER),travis)
@@ -38,11 +38,11 @@ define compile_protobuffs
 		end, \
 		_ = [Compile(F) || F <- string:tokens("$(1)", " ")], \
 		init:stop()' > /dev/null
-	$(eval proto_name := $(shell basename $(1) | sed s/\.[^\.]*$$//))
+	$(eval PROTONAME := $(shell basename $(1) | sed s/\.[^\.]*$$//))
 	@mkdir -p ebin/
 	@mkdir -p include/
-	@mv $(proto_name)_pb.beam ebin/
-	@mv $(proto_name)_pb.hrl include/
+	@mv $(PROTONAME)_pb.beam ebin/
+	@mv $(PROTONAME)_pb.hrl include/
 endef
 
 # Keep `all' as the default target

@@ -53,6 +53,7 @@
 % API
 -export([
   start/0,
+  stop/0,
   send_event/1,
   send_event/2,
   send_event/3,
@@ -81,6 +82,13 @@
 start() ->
   ok = application:start(protobuffs),
   ok = application:start(katja),
+  ok.
+
+% @doc Stops the Katja application and all of its dependencies. This is really only meant for usage inside the console.
+-spec stop() -> ok.
+stop() ->
+  ok = application:stop(katja),
+  ok = application:stop(protobuffs),
   ok.
 
 % @doc Delegates to {@link send_event/2}. `Pid' is set to `katja_writer'.
