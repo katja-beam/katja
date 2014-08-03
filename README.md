@@ -98,7 +98,7 @@ receive
 end.
 ```
 
-You can also query Riemann asynchronously using `katja:query_async/{1,2}` and `katja:query_event_async/{1,2}`.
+You can also query Riemann asynchronously using `katja:query_async/{1,2}` and `katja:query_event_async/{1,2}`. The result of the query will be sent to the inbox of calling process.
 
 ### Pooling
 
