@@ -89,14 +89,7 @@ send_state(Pid, Transport, Data) ->
 %      can be serialized happens inside the process calling this function.
 -spec send_entities(katja:process(), katja_connection:transport(), katja:entities()) -> ok | {error, term()}.
 send_entities(Pid, Transport, Data) ->
-  StateEntities = case lists:keyfind(states, 1, Data) of
-    {states, States} -> [create_state(S) || S <- States];
-    false -> []
-  end,
-  EventEntities = case lists:keyfind(events, 1, Data) of
-    {events, Events} -> [create_event(E) || E <- Events];
-    false -> []
-  end,
+  {EventEntities, StateEntities} = create_events_and_states(Data),
   Entities = StateEntities ++ EventEntities,
   gen_server:call(Pid, {send_message, Transport, entities, Entities}).
 
@@ -139,7 +132,7 @@ code_change(_OldVsn, State, _Extra) ->
 -spec create_event(katja:event()) -> riemannpb_event().
 create_event(Data) ->
   Event = #riemannpb_event{},
-  lists:foldr(fun(K, E) ->
+  lists:foldl(fun(K, E) ->
     case lists:keyfind(K, 1, Data) of
       {K, V} -> set_event_field(K, V, E);
       false -> set_event_field(K, undefined, E)
@@ -149,12 +142,24 @@ create_event(Data) ->
 -spec create_state(katja:state()) -> riemannpb_state().
 create_state(Data) ->
   State = #riemannpb_state{},
-  lists:foldr(fun(K, E) ->
+  lists:foldl(fun(K, E) ->
     case lists:keyfind(K, 1, Data) of
       {K, V} -> set_state_field(K, V, E);
       false -> set_state_field(K, undefined, E)
     end
   end, State, [once|?COMMON_FIELDS]).
+
+-spec create_events_and_states(katja:entities()) -> {[riemannpb_event()], [riemannpb_state()]}.
+create_events_and_states(Data) ->
+  EventEntities = case lists:keyfind(events, 1, Data) of
+    {events, Events} -> [create_event(E) || E <- Events];
+    false -> []
+  end,
+  StateEntities = case lists:keyfind(states, 1, Data) of
+    {states, States} -> [create_state(S) || S <- States];
+    false -> []
+  end,
+  {EventEntities, StateEntities}.
 
 -spec set_event_field(atom(), term(), riemannpb_event()) -> riemannpb_event().
 set_event_field(time, undefined, E) -> E#riemannpb_event{time=current_timestamp()};
