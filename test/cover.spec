@@ -5,3 +5,4 @@
   writer_SUITE,
   reader_SUITE
 ]}.
+{export, "logs/all.coverdata"}.
