@@ -14,3 +14,5 @@ install:
   - URL='http://aphyr.com/riemann/riemann_0.2.6_all.deb'; FILE=`mktemp`; DEBIAN_FRONTEND=noninteractive; wget "$URL" -qO $FILE && sudo dpkg -i $FILE; rm $FILE
 before_script:
   - sudo service riemann start
+after_success:
+  - make coverage-report

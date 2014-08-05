@@ -4,9 +4,13 @@ PROJECT_VERSION = 0.5
 DEPS = protobuffs
 dep_protobuffs = git https://github.com/basho/erlang_protobuffs 0.8.1p4
 
-TEST_DEPS = ecoveralls nifoc_ct_helper
-dep_ecoveralls = git https://github.com/nifoc/ecoveralls master
+TEST_DEPS = nifoc_ct_helper
 dep_nifoc_ct_helper = git https://github.com/nifoc/nifoc_ct_helper master
+
+ifeq ($(USER),travis)
+	TEST_DEPS += ecoveralls
+	dep_ecoveralls = git https://github.com/nifoc/ecoveralls master
+endif
 
 ERLC_OPTS ?= -Werror +debug_info +warn_bif_clash +warn_deprecated_function +warn_deprecated_type \
 				+warn_export_all +warn_export_vars +warn_shadow_vars +warn_obsolete_guard +warn_unused_import \
