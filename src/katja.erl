@@ -271,12 +271,12 @@ query(Pid, Query) ->
   katja_reader:query(Pid, Query).
 
 % @doc Delegates to {@link query_async/2}. `Pid' is set to `katja_reader'.
--spec query_async(string()) -> {ok, reference()}.
+-spec query_async(string()) -> reference().
 query_async(Query) ->
   query_async(katja_reader, Query).
 
 % @doc Delegates to {@link katja_reader:query_async/2}.
--spec query_async(process(), string()) -> {ok, reference()}.
+-spec query_async(process(), string()) -> reference().
 query_async(Pid, Query) ->
   katja_reader:query_async(Pid, Query).
 
@@ -291,11 +291,11 @@ query_event(Pid, Event) ->
   katja_reader:query_event(Pid, Event).
 
 % @doc Delegates to {@link query_event_async/2}. `Pid' is set to `katja_reader'.
--spec query_event_async(event()) -> {ok, reference()}.
+-spec query_event_async(event()) -> reference().
 query_event_async(Event) ->
   query_event_async(katja_reader, Event).
 
 % @doc Delegates to {@link katja_reader:query_event_async/2}.
--spec query_event_async(process(), event()) -> {ok, reference()}.
+-spec query_event_async(process(), event()) -> reference().
 query_event_async(Pid, Event) ->
   katja_reader:query_event_async(Pid, Event).

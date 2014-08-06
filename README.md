@@ -91,7 +91,7 @@ Another way to query Riemann is by using a `katja:event()` and the `katja:query_
 Katja will convert the event to a query string and query Riemann based on the generated string.
 
 ```erlang
-{ok, Ref} = katja:query_async("service = \"katja demo\""),
+Ref = katja:query_async("service = \"katja demo\""),
 receive
   {Ref, {ok, Events}} ->
     % ...
