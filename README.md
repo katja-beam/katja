@@ -82,13 +82,15 @@ ok = katja:send_states([State]).
 
 A query returns a list of events. Events are in the format that you specify when sending data to Riemann.
 
-Another way to query Riemann is by using a `katja:event()` and the `katja:query_event/1` method.
+Instead of a string you can also use a `katja:event()` and the `katja:query_event/1` method to send queries to Riemann.
 
 ```erlang
 {ok, Events} = katja:query_event([{service, "katja demo"}]).
 ```
 
 Katja will convert the event to a query string and query Riemann based on the generated string.
+
+You can use `katja:query_async/{1,2}` and `katja:query_event_async/{1,2}` to send queries asynchronously. The results will be sent to the inbox of the calling process.
 
 ```erlang
 Ref = katja:query_async("service = \"katja demo\""),
@@ -98,15 +100,13 @@ receive
 end.
 ```
 
-You can also query Riemann asynchronously using `katja:query_async/{1,2}` and `katja:query_event_async/{1,2}`. The result of the query will be sent to the inbox of calling process.
-
 ### Pooling
 
 All the methods mentioned above optionally take a `katja:process()` as their first argument, enabling Katja to easily work with existing process pool implementations. `katja:process()` is either a `pid()` or one of the two following atoms: `katja_writer`, `katja_reader`.
 
-The `atom()` cases should not be used directly, since `katja:send_event/1`, `katja:send_state/1`, `katja:query/1` etc. default to setting the correct atom value.
+The `atom()` cases usually don't have to be used directly, since `katja:send_event/1`, `katja:send_state/1`, `katja:query/1` etc. default to setting the correct value.
 
-Additionally you can also "turn off" the `katja_writer` and `katja_reader` processes that are automatically started and supervised by adding their names to the `pool` configuration.
+Additionally you can also "turn off" the `katja_writer` and `katja_reader` processes that are automatically started and supervised by adding their names to the `pool` configuration option.
 
 ### Forcing a transport
 
@@ -119,7 +119,7 @@ ok = katja:send_event(katja_writer, tcp, Event).
 
 The first argument to `katja:send_event/3`, `katja:send_events/3`, `katja:send_state/3`, `katja:send_states/3` and `katja:send_entities/3` is a `katja:process()`. If you're using one of these methods and don't use a process pool, it has to be set to `katja_writer`.
 
-If (for example) you always want to send messages via TCP, you can set the `transport` configuration option to `tcp`.
+You can set the `transport` configuration option to `tcp` or `udp` to always use that transport for sending data to Riemann.
 
 ## Resources
 
