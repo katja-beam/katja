@@ -6,6 +6,7 @@
 * Add `katja:send_event_async/{1,2,3}`, `katja:send_events_async/{1,2,3}`, `katja:send_state_async/{1,2,3}`, `katja:send_states_async/{1,2,3}` and `katja:send_entities_async/{1,2,3}` to asynchronously send data to Riemann
 * Add `katja:query_async/{1,2}` and `katja:query_event_async/{1,2}` to query Riemann asynchronously
 * Add `katja:stop/0` to stop the Katja application and all of its dependencies
+* Fixed a potential infinite loop when sending invalid data via TCP
 
 ## 0.5
 
