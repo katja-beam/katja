@@ -23,7 +23,8 @@
 -export([
   connect/1,
   connect_tcp/1,
-  connect_udp/1
+  connect_udp/1,
+  send_invalid_tcp/1
 ]).
 
 % Common Test
@@ -32,18 +33,28 @@ all() ->
   [
     connect,
     connect_tcp,
-    connect_udp
+    connect_udp,
+    send_invalid_tcp
   ].
 
 % Tests
 
 connect(_Config) ->
-  {ok, _State} = katja_connection:connect(),
+  {ok, State} = katja_connection:connect(),
+  ok = katja_connection:disconnect(State),
   {error, _Reason} = katja_connection:connect("10.99.99.99", 9001).
 
 connect_tcp(_Config) ->
-  {ok, _State} = katja_connection:connect_tcp(),
+  {ok, State} = katja_connection:connect_tcp(),
+  ok = katja_connection:disconnect(State),
   {error, _Reason} = katja_connection:connect_tcp("10.99.99.99", 9001).
 
 connect_udp(_Config) ->
-  {ok, _State} = katja_connection:connect_udp().
+  {ok, State} = katja_connection:connect_udp(),
+  ok = katja_connection:disconnect(State).
+
+send_invalid_tcp(_Config) ->
+  {ok, State} = katja_connection:connect_tcp(),
+  {{error, closed}, State2} = katja_connection:send_message(tcp, <<"invalid">>, State),
+  {{error, closed}, State3} = katja_connection:send_message(tcp, <<"still invalid">>, State2),
+  ok = katja_connection:disconnect(State3).

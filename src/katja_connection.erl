@@ -188,7 +188,6 @@ send_message_tcp(Msg, #connection_state{host=Host, port=Port, tcp_socket=Socket}
     ok ->
       case receive_reply_tcp(Socket) of
         {ok, _RetMsg}=O -> {O, S};
-        {error, closed} -> send_message_tcp(Msg, S);
         {error, _Reason}=E -> {E, S}
       end;
     {error, closed} ->
