@@ -57,18 +57,33 @@
   send_event/1,
   send_event/2,
   send_event/3,
+  send_event_async/1,
+  send_event_async/2,
+  send_event_async/3,
   send_events/1,
   send_events/2,
   send_events/3,
+  send_events_async/1,
+  send_events_async/2,
+  send_events_async/3,
   send_state/1,
   send_state/2,
   send_state/3,
+  send_state_async/1,
+  send_state_async/2,
+  send_state_async/3,
   send_states/1,
   send_states/2,
   send_states/3,
+  send_states_async/1,
+  send_states_async/2,
+  send_states_async/3,
   send_entities/1,
   send_entities/2,
   send_entities/3,
+  send_entities_async/1,
+  send_entities_async/2,
+  send_entities_async/3,
   query/1,
   query/2,
   query_async/1,
@@ -110,6 +125,21 @@ send_event(Pid, Data) ->
 send_event(Pid, Transport, Data) ->
   katja_writer:send_event(Pid, Transport, Data).
 
+% @doc Delegates to {@link send_event_async/2}. `Pid' is set to `katja_writer'.
+-spec send_event_async(event()) -> ok.
+send_event_async(Data) ->
+  send_event_async(katja_writer, Data).
+
+% @doc Delegates to {@link send_event_async/3}. `Transport' is set to `config'.
+-spec send_event_async(process(), event()) -> ok.
+send_event_async(Pid, Data) ->
+  send_event_async(Pid, config, Data).
+
+% @doc Sends a single event to Riemann asynchronously. Delegates to {@link katja_writer:send_event_async/3}.
+-spec send_event_async(process(), katja_connection:transport(), event()) -> ok.
+send_event_async(Pid, Transport, Data) ->
+  katja_writer:send_event_async(Pid, Transport, Data).
+
 % @doc Delegates to {@link send_events/2}. `Pid' is set to `katja_writer'.
 -spec send_events([event()]) -> ok | {error, term()}.
 send_events(Data) ->
@@ -124,6 +154,21 @@ send_events(Pid, Data) ->
 -spec send_events(process(), katja_connection:transport(), [event()]) -> ok | {error, term()}.
 send_events(Pid, Transport, Data) ->
   send_entities(Pid, Transport, [{events, Data}]).
+
+% @doc Delegates to {@link send_events_async/2}. `Pid' is set to `katja_writer'.
+-spec send_events_async([event()]) -> ok.
+send_events_async(Data) ->
+  send_events_async(katja_writer, Data).
+
+% @doc Delegates to {@link send_events_async/3}. `Transport' is set to `config'.
+-spec send_events_async(process(), [event()]) -> ok.
+send_events_async(Pid, Data) ->
+  send_events_async(Pid, config, Data).
+
+% @doc Sends multiple events to Riemann asynchronously. Simple wrapper around {@link send_entities_async/3}.
+-spec send_events_async(process(), katja_connection:transport(), [event()]) -> ok.
+send_events_async(Pid, Transport, Data) ->
+  send_entities_async(Pid, Transport, [{events, Data}]).
 
 % @doc Delegates to {@link send_state/2}. `Pid' is set to `katja_writer'.
 -spec send_state(state()) -> ok | {error, term()}.
@@ -140,6 +185,21 @@ send_state(Pid, Data) ->
 send_state(Pid, Transport, Data) ->
   katja_writer:send_state(Pid, Transport, Data).
 
+% @doc Delegates to {@link send_state_async/2}. `Pid' is set to `katja_writer'.
+-spec send_state_async(state()) -> ok.
+send_state_async(Data) ->
+  send_state_async(katja_writer, Data).
+
+% @doc Delegates to {@link send_state_async/3}. `Transport' is set to `config'.
+-spec send_state_async(process(), state()) -> ok.
+send_state_async(Pid, Data) ->
+  send_state_async(Pid, config, Data).
+
+% @doc Sends a single state to Riemann asynchronously. Delegates to {@link katja_writer:send_state_async/3}.
+-spec send_state_async(process(), katja_connection:transport(), state()) -> ok.
+send_state_async(Pid, Transport, Data) ->
+  katja_writer:send_state_async(Pid, Transport, Data).
+
 % @doc Delegates to {@link send_states/2}. `Pid' is set to `katja_writer'.
 -spec send_states([state()]) -> ok | {error, term()}.
 send_states(Data) ->
@@ -155,6 +215,21 @@ send_states(Pid, Data) ->
 send_states(Pid, Transport, Data) ->
   send_entities(Pid, Transport, [{states, Data}]).
 
+% @doc Delegates to {@link send_states_async/2}. `Pid' is set to `katja_writer'.
+-spec send_states_async([state()]) -> ok.
+send_states_async(Data) ->
+  send_states_async(katja_writer, Data).
+
+% @doc Delegates to {@link send_states_async/3}. `Transport' is set to `config'.
+-spec send_states_async(process(), [state()]) -> ok.
+send_states_async(Pid, Data) ->
+  send_states_async(Pid, config, Data).
+
+% @doc Sends multiple states to Riemann asynchronously. Simple wrapper around {@link send_entities_async/3}.
+-spec send_states_async(process(), katja_connection:transport(), [state()]) -> ok.
+send_states_async(Pid, Transport, Data) ->
+  send_entities_async(Pid, Transport, [{states, Data}]).
+
 % @doc Delegates to {@link send_entities/2}. `Pid' is set to `katja_writer'.
 -spec send_entities(entities()) -> ok | {error, term()}.
 send_entities(Data) ->
@@ -169,6 +244,21 @@ send_entities(Pid, Data) ->
 -spec send_entities(process(), katja_connection:transport(), entities()) -> ok | {error, term()}.
 send_entities(Pid, Transport, Data) ->
   katja_writer:send_entities(Pid, Transport, Data).
+
+% @doc Delegates to {@link send_entities_async/2}. `Pid' is set to `katja_writer'.
+-spec send_entities_async(entities()) -> ok.
+send_entities_async(Data) ->
+  send_entities_async(katja_writer, Data).
+
+% @doc Delegates to {@link send_entities_async/3}. `Transport' is set to `config'.
+-spec send_entities_async(process(), entities()) -> ok.
+send_entities_async(Pid, Data) ->
+  send_entities_async(Pid, config, Data).
+
+% @doc Sends multiple entities (events and/or states) to Riemann asynchronously. Delegates to {@link katja_writer:send_entities_async/3}.
+-spec send_entities_async(process(), katja_connection:transport(), entities()) -> ok.
+send_entities_async(Pid, Transport, Data) ->
+  katja_writer:send_entities_async(Pid, Transport, Data).
 
 % @doc Delegates to {@link query/2}. `Pid' is set to `katja_reader'.
 -spec query(string()) -> {ok, [event()]} | {error, term()}.

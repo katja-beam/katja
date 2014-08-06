@@ -77,7 +77,8 @@ query(Pid, Query) ->
   Msg = create_query_message(Query),
   gen_server:call(Pid, {query, Msg}).
 
-% @doc Sends a query string to Riemann and returns the result asynchronously by sending a message to the caller.
+% @doc Sends a query string to Riemann and returns the result asynchronously by sending a message to the caller.<br />
+%      See the {@link query/2} documentation for more details.
 -spec query_async(katja:process(), iolist()) -> {ok, reference()}.
 query_async(Pid, Query) ->
   Ref = make_ref(),
@@ -94,7 +95,8 @@ query_event(Pid, Event) ->
   Query = create_query_string(Event),
   query(Pid, Query).
 
-% @doc Takes an event and transforms it into a query string. The generated query string is passed to {@link query_async/2}.
+% @doc Takes an event and transforms it into a query string. The generated query string is passed to {@link query_async/2}.<br />
+%      See the {@link query_event/2} documentation for more details.
 -spec query_event_async(katja:process(), katja:event()) -> {ok, reference()}.
 query_event_async(Pid, Event) ->
   Query = create_query_string(Event),

@@ -31,8 +31,11 @@
   start_link/1,
   stop/1,
   send_event/3,
+  send_event_async/3,
   send_state/3,
-  send_entities/3
+  send_state_async/3,
+  send_entities/3,
+  send_entities_async/3
 ]).
 
 % gen_server
@@ -72,6 +75,14 @@ send_event(Pid, Transport, Data) ->
   Event = create_event(Data),
   gen_server:call(Pid, {send_message, Transport, event, Event}).
 
+% @doc Sends an event to Riemann asynchronously.
+%      If sending the event fails, you will <strong>not</strong> be notified about it.<br />
+%      See the {@link send_event/3} documentation for more details.
+-spec send_event_async(katja:process(), katja_connection:transport(), katja:event()) -> ok.
+send_event_async(Pid, Transport, Data) ->
+  Event = create_event(Data),
+  gen_server:cast(Pid, {send_message, Transport, event, Event}).
+
 % @doc Sends a state to Riemann.<br />
 %      If you do not set the `time' field manually, it will default to the local system time.<br />
 %      You can set default values for `host', `tags' and `ttl' using the `defaults' configuration option.<br /><br />
@@ -81,6 +92,14 @@ send_event(Pid, Transport, Data) ->
 send_state(Pid, Transport, Data) ->
   State = create_state(Data),
   gen_server:call(Pid, {send_message, Transport, state, State}).
+
+% @doc Sends a state to Riemann asynchronously.
+%      If sending the state fails, you will <strong>not</strong> be notified about it.<br />
+%      See the {@link send_state/3} documentation for more details.
+-spec send_state_async(katja:process(), katja_connection:transport(), katja:event()) -> ok.
+send_state_async(Pid, Transport, Data) ->
+  State = create_state(Data),
+  gen_server:cast(Pid, {send_message, Transport, state, State}).
 
 % @doc Sends multiple entities (events and/or states) to Riemann.<br />
 %      If you do not set the `time' field manually, it will default to the local system time.<br />
@@ -92,6 +111,15 @@ send_entities(Pid, Transport, Data) ->
   {EventEntities, StateEntities} = create_events_and_states(Data),
   Entities = StateEntities ++ EventEntities,
   gen_server:call(Pid, {send_message, Transport, entities, Entities}).
+
+% @doc Sends multiple entities (events and/or states) to Riemann asynchronously.
+%      If sending the entities fails, you will <strong>not</strong> be notified about it.<br />
+%      See the {@link send_entities/3} documentation for more details.
+-spec send_entities_async(katja:process(), katja_connection:transport(), katja:entities()) -> ok.
+send_entities_async(Pid, Transport, Data) ->
+  {EventEntities, StateEntities} = create_events_and_states(Data),
+  Entities = StateEntities ++ EventEntities,
+  gen_server:cast(Pid, {send_message, Transport, entities, Entities}).
 
 % gen_server
 
@@ -111,6 +139,10 @@ handle_call(_Request, _From, State) ->
   {reply, ignored, State}.
 
 % @hidden
+handle_cast({send_message, Transport, _Type, Data}, State) ->
+  Msg = create_message(Data),
+  {_Reply, State2} = send_message(Transport, Msg, State),
+  {noreply, State2};
 handle_cast(_Msg, State) ->
   {noreply, State}.
 
@@ -235,7 +267,8 @@ create_message(Entities) ->
   {Events, States} = lists:splitwith(fun(Entity) -> is_record(Entity, riemannpb_event) end, Entities),
   #riemannpb_msg{events=Events, states=States}.
 
--spec send_message(katja_connection:transport(), riemannpb_message(), katja_connection:state()) -> {ok, katja_connection:state()} | {{error, term()}, katja_connection:state()}.
+-spec send_message(katja_connection:transport(), riemannpb_message(), katja_connection:state()) -> {ok, katja_connection:state()} |
+                                                                                                   {{error, term()}, katja_connection:state()}.
 send_message(Transport, Msg, State) ->
   Msg2 = katja_pb:encode_riemannpb_msg(Msg),
   BinMsg = iolist_to_binary(Msg2),

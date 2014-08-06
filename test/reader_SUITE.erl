@@ -35,7 +35,8 @@
   query_async/1,
   query_event/1,
   query_event_pid/1,
-  query_event_async/1
+  query_event_async/1,
+  ignore_unknown_messages/1
 ]).
 
 % Common Test
@@ -47,7 +48,8 @@ all() ->
     query_async,
     query_event,
     query_event_pid,
-    query_event_async
+    query_event_async,
+    ignore_unknown_messages
   ].
 
 init_per_suite(Config) ->
@@ -55,7 +57,7 @@ init_per_suite(Config) ->
   ok = setup_events(),
   Config.
 
-init_per_testcase(Test, Config) when Test =:= query_pid; Test =:= query_event_pid ->
+init_per_testcase(Test, Config) when Test =:= query_pid; Test =:= query_event_pid; Test =:= ignore_unknown_messages ->
   {ok, RPid} = katja_reader:start_link(),
   [{pid_reader, RPid} | Config];
 init_per_testcase(_Test, Config) ->
@@ -65,7 +67,7 @@ end_per_suite(_Config) ->
   ok = katja:stop(),
   ok.
 
-end_per_testcase(Test, Config) when Test =:= query_pid; Test =:= query_event_pid ->
+end_per_testcase(Test, Config) when Test =:= query_pid; Test =:= query_event_pid; Test =:= ignore_unknown_messages ->
   RPid = ?config(pid_reader, Config),
   ok = katja_reader:stop(RPid),
   ok;
@@ -121,6 +123,12 @@ query_event_async(_Config) ->
     {Ref, {ok, [ServiceEvent]}} ->
       {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent)
   end.
+
+ignore_unknown_messages(Config) ->
+  RPid = ?config(pid_reader, Config),
+  ignored = gen_server:call(RPid, foobar),
+  ok = gen_server:cast(RPid, foobar),
+  RPid ! foobar.
 
 % Private
 

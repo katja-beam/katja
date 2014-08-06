@@ -3,6 +3,7 @@
 ## 0.6
 
 * Switch from [Rebar](https://github.com/rebar/rebar) to [erlang.mk](https://github.com/ninenines/erlang.mk)
+* Add `katja:send_event_async/{1,2,3}`, `katja:send_events_async/{1,2,3}`, `katja:send_state_async/{1,2,3}`, `katja:send_states_async/{1,2,3}` and `katja:send_entities_async/{1,2,3}` to asynchronously send data to Riemann
 * Add `katja:query_async/{1,2}` and `katja:query_event_async/{1,2}` to query Riemann asynchronously
 * Add `katja:stop/0` to stop the Katja application and all of its dependencies
 

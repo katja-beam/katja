@@ -20,7 +20,7 @@ TEST_ERLC_OPTS ?= +debug_info +warn_bif_clash +warn_deprecated_function +warn_de
 				+warn_export_all +warn_export_vars +warn_shadow_vars +warn_obsolete_guard +warn_unused_import \
 				+warn_unused_function +warn_unused_record +warn_unused_vars +warnings_as_errors
 
-CT_SUITES = eunit writer reader
+CT_SUITES = eunit connection writer reader
 CT_OPTS = -ct_hooks nifoc_ct_hook [] -cover ./test/cover.spec
 
 EDOC_OPTS = {def, [ \
