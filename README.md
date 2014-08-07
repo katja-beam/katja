@@ -44,6 +44,15 @@ ok = katja:send_event(Event).
 
 An event in Katja is just a property list. A list of all possible properties can be found in the `katja` module.
 
+You can send an event asynchronously using `katja:send_event_async/{1,2,3}`:
+
+```erlang
+Event = [{service, "katja demo"}, {metric, 9000.1}],
+ok = katja:send_event_async(Event).
+```
+
+This will return immediately and you will **not** know if the call has succeeded.
+
 ### Sending a state
 
 ```erlang
@@ -52,6 +61,8 @@ ok = katja:send_state(State).
 ```
 
 Just like events, a state is a property list. The properties can once again be found in the `katja` module.
+
+Just like for events, you can use `katja:send_state_async/{1,2,3}` to send states in a non-blocking way.
 
 ### Sending multiple entities
 
@@ -73,6 +84,8 @@ ok = katja:send_states([State]).
 ```
 
 `katja:send_events/1` and `katja:send_states/1` are also available to send multiple events or states. Both of them delegate to `katja:send_entities/1` internally.
+
+Sending entities asynchronously is also possible. All of the methods mentioned above have matching `_async/{1,2,3}` counterparts.
 
 ### Querying
 
