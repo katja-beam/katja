@@ -1,5 +1,5 @@
 PROJECT = katja
-PROJECT_VERSION = 0.5
+PROJECT_VERSION = 0.6
 
 DEPS = protobuffs
 dep_protobuffs = git https://github.com/basho/erlang_protobuffs 0.8.1p4

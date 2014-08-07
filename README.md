@@ -2,7 +2,7 @@
 
 A simple [Riemann](http://riemann.io) client written in Erlang.
 
-[![Build Status](https://travis-ci.org/nifoc/katja.png)](https://travis-ci.org/nifoc/katja)
+[![Build Status](https://travis-ci.org/nifoc/katja.png)](https://travis-ci.org/nifoc/katja) [![Coverage Status](https://coveralls.io/repos/nifoc/katja/badge.png?branch=master)](https://coveralls.io/r/nifoc/katja?branch=master)
 
 ## Status
 
@@ -136,7 +136,7 @@ You can set the `transport` configuration option to `tcp` or `udp` to always use
 
 ## Resources
 
-* [Generated EDoc](http://katja.nifoc.pw/0.5/) ([All Versions](http://katja.nifoc.pw))
+* [Generated EDoc](http://katja.nifoc.pw/0.6/) ([All Versions](http://katja.nifoc.pw))
 * [Katja: Riemann Client Written In Erlang](https://blog.kempkens.io/posts/katja-riemann-client-written-in-erlang/)
 
 ## Related Projects
