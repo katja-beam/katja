@@ -52,7 +52,7 @@ init([]) ->
     worker,
     [katja_reader]
   }, Children),
-  {ok, {{one_for_one, 5, 10}, Children2}}.
+  {ok, {{one_for_all, 10, 10}, Children2}}.
 
 % Private
 

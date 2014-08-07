@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7
+
+* Change the restart strategy of the supervisor from `one_for_one` to `one_for_all`
+
 ## 0.6
 
 [Documentation](http://katja.nifoc.pw/0.6/)
