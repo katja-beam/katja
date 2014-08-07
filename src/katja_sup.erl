@@ -38,25 +38,23 @@ start_link() ->
 
 init([]) ->
   Pool = application:get_env(katja, pool, ?DEFAULT_POOL),
-  Children = maybe_add_child(katja_writer, Pool, {katja_writer,
-    {katja_writer, start_link, [register]},
-    permanent,
-    5000,
-    worker,
-    [katja_writer]
-  }, []),
-  Children2 = maybe_add_child(katja_reader, Pool, {katja_reader,
-    {katja_reader, start_link, [register]},
-    permanent,
-    5000,
-    worker,
-    [katja_reader]
-  }, Children),
+  Children = maybe_add_child(katja_writer, Pool, child_spec(katja_writer), []),
+  Children2 = maybe_add_child(katja_reader, Pool, child_spec(katja_reader), Children),
   {ok, {{one_for_all, 10, 10}, Children2}}.
 
 % Private
 
--spec maybe_add_child(atom(), [atom()], tuple(), [tuple()]) -> [tuple()].
+-spec child_spec(atom()) -> supervisor:child_spec().
+child_spec(Mod) ->
+  {Mod,
+    {Mod, start_link, [register]},
+    permanent,
+    5000,
+    worker,
+    [Mod]
+  }.
+
+-spec maybe_add_child(atom(), [atom()], supervisor:child_spec(), [supervisor:child_spec()]) -> [supervisor:child_spec()].
 maybe_add_child(Child, Pool, Spec, Children) ->
   case lists:member(Child, Pool) of
     true -> Children;
@@ -67,6 +65,8 @@ maybe_add_child(Child, Pool, Spec, Children) ->
 
 -ifdef(TEST).
 maybe_add_child_test() ->
-  ?assertEqual([{foo, bar}], maybe_add_child(test_one, [], {foo, bar}, [])),
-  ?assertEqual([], maybe_add_child(test_two, [test_two], {foo, bar}, [])).
+  SpecA = child_spec(foo),
+  SpecB = child_spec(bar),
+  ?assertEqual([SpecA], maybe_add_child(test_one, [], SpecA, [])),
+  ?assertEqual([], maybe_add_child(test_two, [test_two], SpecB, [])).
 -endif.
