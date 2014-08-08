@@ -27,11 +27,11 @@
 -define(TCP_MIN_SIZE, 16385).
 
 -record(connection_state, {
-  tcp_socket = undefined :: gen_tcp:socket() | undefined,
-  udp_socket = undefined :: gen_udp:socket() | undefined,
-  host = undefined :: string() | undefined,
-  port = undefined :: pos_integer() | undefined,
-  transport = undefined :: transport() | undefined
+  tcp_socket :: gen_tcp:socket(),
+  udp_socket :: gen_udp:socket(),
+  host :: string(),
+  port :: pos_integer(),
+  transport :: transport()
 }).
 
 % Types
