@@ -134,13 +134,17 @@ send_events_async(Config) ->
   SmallEvent = [{service, "katja 1"}, {metric, 9001}],
   ok = katja:send_event_async(SmallEvent),
   ok = katja:send_event_async(WPid, tcp, SmallEvent),
+  ok = katja:send_event_async(WPid, udp, SmallEvent, 0.1),
+  ok = katja:send_event_async(WPid, udp, SmallEvent, 0.0),
   ok = katja:send_event_async(WPid, SmallEvent),
   Description = lists:flatten(lists:duplicate(4096, "abcd")),
   Event = [{service, "katja 1"}, {metric, 9001}, {description, Description}],
   ok = katja:send_event_async(WPid, Event),
   ok = katja:send_events_async([Event, Event]),
   ok = katja:send_events_async(WPid, [Event, Event]),
-  ok = katja:send_events_async(WPid, tcp, [Event, Event]).
+  ok = katja:send_events_async(WPid, tcp, [Event, Event]),
+  ok = katja:send_events_async(WPid, config, [Event, Event], 0.5),
+  ok = katja:send_events_async(WPid, config, [Event, Event], 0.0).
 
 send_state(_Config) ->
   ok = katja:send_state([{service, "katja 1"}, {state, "testing"}]),
@@ -175,11 +179,15 @@ send_states_async(Config) ->
   State = [{service, "katja 1"}, {state, "testing"}],
   ok = katja:send_state_async(State),
   ok = katja:send_state_async(WPid, tcp, State),
+  ok = katja:send_state_async(WPid, udp, State, 0.1),
+  ok = katja:send_state_async(WPid, udp, State, 0.0),
   ok = katja:send_state_async(WPid, State),
   ok = katja:send_states_async([State, State]),
   ok = katja:send_states_async(katja_writer, [State, State]),
   ok = katja:send_states_async(WPid, [State, State]),
-  ok = katja:send_states_async(WPid, udp, [State, State]).
+  ok = katja:send_states_async(WPid, udp, [State, State]),
+  ok = katja:send_states_async(WPid, config, [State, State], 0.5),
+  ok = katja:send_states_async(WPid, config, [State, State], 0.0).
 
 send_entities(_Config) ->
   Description = lists:flatten(lists:duplicate(4096, "abcd")),
@@ -204,7 +212,9 @@ send_entities_async(Config) ->
   ok = katja:send_entities_async(WPid, [{events, [Event]}]),
   ok = katja:send_entities_async(WPid, [{states, [State]}]),
   ok = katja:send_entities_async([{states, [State, State]}, {events, [Event, Event]}]),
-  ok = katja:send_entities_async(WPid, [{states, [State, State]}, {events, [Event, Event]}]).
+  ok = katja:send_entities_async(WPid, [{states, [State, State]}, {events, [Event, Event]}]),
+  ok = katja:send_entities_async(WPid, config, [{states, [State, State]}, {events, [Event, Event]}], 0.5),
+  ok = katja:send_entities_async(WPid, config, [{states, [State, State]}, {events, [Event, Event]}], 0.0).
 
 ignore_unknown_messages(Config) ->
   WPid = ?config(pid_writer, Config),

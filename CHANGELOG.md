@@ -3,6 +3,7 @@
 ## 0.7
 
 * Change the restart strategy of the supervisor from `one_for_one` to `one_for_all`
+* Add an optional `SampleRate` parameter to all `_async` calls, allowing you to easily sample metrics
 
 ## 0.6
 

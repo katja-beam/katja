@@ -31,11 +31,11 @@
   start_link/1,
   stop/1,
   send_event/3,
-  send_event_async/3,
+  send_event_async/4,
   send_state/3,
-  send_state_async/3,
+  send_state_async/4,
   send_entities/3,
-  send_entities_async/3
+  send_entities_async/4
 ]).
 
 % gen_server
@@ -75,13 +75,18 @@ send_event(Pid, Transport, Data) ->
   Event = create_event(Data),
   gen_server:call(Pid, {send_message, Transport, event, Event}).
 
-% @doc Sends an event to Riemann asynchronously.
+% @doc Sends an event to Riemann asynchronously. `SampleRate' is used to randomly drop some events. Setting it to
+%      `1.0' will send all the data, but might lead to overload.<br />
 %      If sending the event fails, you will <strong>not</strong> be notified about it.<br />
 %      See the {@link send_event/3} documentation for more details.
--spec send_event_async(katja:process(), katja_connection:transport(), katja:event()) -> ok.
-send_event_async(Pid, Transport, Data) ->
-  Event = create_event(Data),
-  gen_server:cast(Pid, {send_message, Transport, event, Event}).
+-spec send_event_async(katja:process(), katja_connection:transport(), katja:event(), katja:sample_rate()) -> ok.
+send_event_async(Pid, Transport, Data, SampleRate) ->
+  case should_send_data(SampleRate) of
+    false -> ok;
+    true ->
+      Event = create_event(Data),
+      gen_server:cast(Pid, {send_message, Transport, event, Event})
+  end.
 
 % @doc Sends a state to Riemann.<br />
 %      If you do not set the `time' field manually, it will default to the local system time.<br />
@@ -93,13 +98,18 @@ send_state(Pid, Transport, Data) ->
   State = create_state(Data),
   gen_server:call(Pid, {send_message, Transport, state, State}).
 
-% @doc Sends a state to Riemann asynchronously.
+% @doc Sends a state to Riemann asynchronously. `SampleRate' is used to randomly drop some states. Setting it to
+%      `1.0' will send all the data, but might lead to overload.<br />
 %      If sending the state fails, you will <strong>not</strong> be notified about it.<br />
 %      See the {@link send_state/3} documentation for more details.
--spec send_state_async(katja:process(), katja_connection:transport(), katja:event()) -> ok.
-send_state_async(Pid, Transport, Data) ->
-  State = create_state(Data),
-  gen_server:cast(Pid, {send_message, Transport, state, State}).
+-spec send_state_async(katja:process(), katja_connection:transport(), katja:event(), katja:sample_rate()) -> ok.
+send_state_async(Pid, Transport, Data, SampleRate) ->
+  case should_send_data(SampleRate) of
+    false -> ok;
+    true ->
+      State = create_state(Data),
+      gen_server:cast(Pid, {send_message, Transport, state, State})
+  end.
 
 % @doc Sends multiple entities (events and/or states) to Riemann.<br />
 %      If you do not set the `time' field manually, it will default to the local system time.<br />
@@ -112,14 +122,19 @@ send_entities(Pid, Transport, Data) ->
   Entities = StateEntities ++ EventEntities,
   gen_server:call(Pid, {send_message, Transport, entities, Entities}).
 
-% @doc Sends multiple entities (events and/or states) to Riemann asynchronously.
+% @doc Sends multiple entities (events and/or states) to Riemann asynchronously. `SampleRate' is used to randomly drop some entities. Setting it to
+%      `1.0' will send all the data, but might lead to overload.<br />
 %      If sending the entities fails, you will <strong>not</strong> be notified about it.<br />
 %      See the {@link send_entities/3} documentation for more details.
--spec send_entities_async(katja:process(), katja_connection:transport(), katja:entities()) -> ok.
-send_entities_async(Pid, Transport, Data) ->
-  {EventEntities, StateEntities} = create_events_and_states(Data),
-  Entities = StateEntities ++ EventEntities,
-  gen_server:cast(Pid, {send_message, Transport, entities, Entities}).
+-spec send_entities_async(katja:process(), katja_connection:transport(), katja:entities(), katja:sample_rate()) -> ok.
+send_entities_async(Pid, Transport, Data, SampleRate) ->
+  case should_send_data(SampleRate) of
+    false -> ok;
+    true ->
+      {EventEntities, StateEntities} = create_events_and_states(Data),
+      Entities = StateEntities ++ EventEntities,
+      gen_server:cast(Pid, {send_message, Transport, entities, Entities})
+  end.
 
 % gen_server
 
@@ -160,6 +175,21 @@ code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
 % Private
+
+-spec should_send_data(katja:sample_rate()) -> boolean().
+should_send_data(1.0) ->
+  true;
+should_send_data(SampleRate) ->
+  ok = maybe_seed(),
+  random:uniform() =< SampleRate.
+
+maybe_seed() ->
+  _ = case erlang:get(random_seed) of
+    undefined -> random:seed(os:timestamp());
+    {R, R, R} -> random:seed(os:timestamp());
+    _ -> ok
+  end,
+  ok.
 
 -spec create_event(katja:event()) -> riemannpb_event().
 create_event(Data) ->
