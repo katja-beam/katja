@@ -3,7 +3,7 @@
 ## 0.7
 
 * Change the restart strategy of the supervisor from `one_for_one` to `one_for_all`
-* Add an optional `SampleRate` parameter to all `_async` calls, allowing you to easily sample metrics
+* Add `katja:send_event_async/4`, `katja:send_events_async/4`, `katja:send_state_async/4`, `katja:send_states_async/4` and `katja:send_entities_async/4` with a `SampleRate` parameter, allowing you to easily sample metrics
 
 ## 0.6
 
