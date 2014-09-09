@@ -7,7 +7,7 @@ otp_release:
   - R16B02
   - R16B01
 script:
-  - make plt && make dialyze
+  - make dialyze
   - make tests
 
 install:
