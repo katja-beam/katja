@@ -17,5 +17,3 @@ before_script:
   - sudo service riemann start
 after_success:
   - make coverage-report
-
-sudo: false
