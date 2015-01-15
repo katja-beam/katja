@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1
+
+[Documentation](http://katja.nifoc.pw/0.7.1/)
+
+* Handle some common socket errors (thanks [@puzza007](https://github.com/puzza007))
+
 ## 0.7
 
 [Documentation](http://katja.nifoc.pw/0.7/)
