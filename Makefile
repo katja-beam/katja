@@ -24,7 +24,7 @@ CT_SUITES = eunit connection writer reader
 CT_OPTS = -ct_hooks nifoc_ct_hook [] -cover ./test/cover.spec
 
 EDOC_OPTS = {def, [ \
-					{years, "2014"}, \
+					{years, "2014-2015"}, \
 					{version, "$(PROJECT_VERSION)"} \
 				]}
 

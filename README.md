@@ -148,7 +148,7 @@ You can set the `transport` configuration option to `tcp` or `udp` to always use
 [ISC](https://en.wikipedia.org/wiki/ISC_license).
 
 ```
-Copyright (c) 2014, Daniel Kempkens <daniel@kempkens.io>
+Copyright (c) 2014-2015, Daniel Kempkens <daniel@kempkens.io>
 
 Permission to use, copy, modify, and/or distribute this software for any purpose
 with or without fee is hereby granted, provided that the above copyright notice
