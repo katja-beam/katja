@@ -211,7 +211,7 @@ receive_reply_tcp(Socket) ->
 
 -spec receive_reply_tcp(gen_tcp:socket(), binary()) -> {ok, term()} | {error, term()}.
 receive_reply_tcp(Socket, Buffer) ->
-  case gen_tcp:recv(Socket, 0, 5000) of
+  case gen_tcp:recv(Socket, 0, 4000) of
     {ok, BinMsg} ->
       BinMsg2 = <<Buffer/binary, BinMsg/binary>>,
       case decode_message(BinMsg2) of
