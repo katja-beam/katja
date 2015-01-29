@@ -182,14 +182,9 @@ send_message_udp(Msg, #connection_state{host=Host, port=Port, udp_socket=Socket}
   end.
 
 connect_and_send(Msg, S=#connection_state{host=Host, port=Port}) ->
-  case connect_tcp(Host, Port) of
-    {ok, #connection_state{tcp_socket=NewSocket}} ->
-       S2 = S#connection_state{tcp_socket=NewSocket},
-       send_message_tcp(Msg, S2);
-    {error, _Reason}=E ->
-       S2 = S#connection_state{tcp_socket=undefined},
-       {E, S2}
-  end.
+  {ok, #connection_state{tcp_socket=NewSocket}} = connect_tcp(Host, Port),
+  S2 = S#connection_state{tcp_socket=NewSocket},
+  send_message_tcp(Msg, S2).
 
 -spec send_message_tcp(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
 send_message_tcp(Msg, #connection_state{tcp_socket=Socket}=S) when Socket =/= undefined ->
