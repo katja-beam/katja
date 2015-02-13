@@ -254,7 +254,7 @@ set_state_field(host, undefined, S) -> S#riemannpb_state{host=default_hostname()
 set_state_field(host, V, S) -> S#riemannpb_state{host=V};
 set_state_field(description, V, S) -> S#riemannpb_state{description=V};
 set_state_field(tags, undefined, S) -> S#riemannpb_state{tags=default_tags()};
-set_state_field(tags, V, S) -> S#riemannpb_state{tags=V};
+set_state_field(tags, V, S) -> S#riemannpb_state{tags=tag_values(V)};
 set_state_field(ttl, undefined, S) -> S#riemannpb_state{ttl=default_ttl()};
 set_state_field(ttl, V, S) -> S#riemannpb_state{ttl=V};
 set_state_field(once, V, S) -> S#riemannpb_state{once=V}.
@@ -277,16 +277,7 @@ default_hostname() ->
 default_tags() ->
   Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
   case lists:keyfind(tags, 1, Defaults) of
-    {tags, Tags} ->
-      lists:map(fun(Tag) ->
-        case Tag of
-          instance ->
-            Node = atom_to_binary(node(), utf8),
-            Name = hd(binary:split(Node, <<"@">>)),
-            ["instance: ", Name];
-          _ -> Tag
-        end
-      end, Tags);
+    {tags, Tags} -> tag_values(Tags);
     false -> []
   end.
 
@@ -297,6 +288,17 @@ default_ttl() ->
     {ttl, TTL} -> TTL;
     false -> undefined
   end.
+
+-spec tag_values([iolist() | atom()]) -> [iolist()].
+tag_values(Tags) -> [tag_value(T) || T <- Tags].
+
+-spec tag_value(iolist() | atom()) -> iolist().
+tag_value(instance) ->
+  Node = atom_to_binary(node(), utf8),
+  Name = hd(binary:split(Node, <<"@">>)),
+  ["instance: ", Name];
+tag_value(Tag) ->
+  Tag.
 
 -spec current_timestamp() -> pos_integer().
 current_timestamp() ->
