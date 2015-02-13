@@ -277,7 +277,16 @@ default_hostname() ->
 default_tags() ->
   Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
   case lists:keyfind(tags, 1, Defaults) of
-    {tags, Tags} -> Tags;
+    {tags, Tags} ->
+      lists:map(fun(Tag) ->
+        case Tag of
+          instance ->
+            Node = atom_to_binary(node(), utf8),
+            Name = hd(binary:split(Node, <<"@">>)),
+            ["instance: ", Name];
+          _ -> Tag
+        end
+      end, Tags);
     false -> []
   end.
 
@@ -363,14 +372,21 @@ default_hostname_test() ->
   ok = application:set_env(katja, defaults, [{host, Host}]),
   ?assertEqual(Host, default_hostname()),
   ok = application:unset_env(katja, defaults),
-  ?assertNotEqual(Host, default_hostname()).
+  ?assertNotEqual(Host, default_hostname()),
+  ok = application:set_env(katja, defaults, [{host, node_name}]),
+  ?assertEqual(atom_to_binary(node(), utf8), default_hostname()),
+  ok = application:set_env(katja, defaults, [{host, vm_name}]),
+  ?assert(is_list(default_hostname())).
 
 default_tags_test() ->
   Tags = ["some", "tags"],
   ok = application:set_env(katja, defaults, [{tags, Tags}]),
   ?assertEqual(Tags, default_tags()),
   ok = application:unset_env(katja, defaults),
-  ?assertEqual([], default_tags()).
+  ?assertEqual([], default_tags()),
+  ok = application:set_env(katja, defaults, [{tags, [instance]}]),
+  [InstanceTag] = default_tags(),
+  ?assertEqual("instance: ", hd(InstanceTag)).
 
 default_ttl_test() ->
   TTL = 60.0,

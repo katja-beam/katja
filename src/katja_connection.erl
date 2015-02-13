@@ -192,7 +192,7 @@ send_message_tcp(Msg, #connection_state{host=Host, port=Port, tcp_socket=Socket}
       end;
     {error, Reason} when Reason == econnrefused orelse
                          Reason == closed orelse
-                         Reason == timeout  ->
+                         Reason == timeout ->
       case connect_tcp(Host, Port) of
         {ok, #connection_state{tcp_socket=NewSocket}} ->
           S2 = S#connection_state{tcp_socket=NewSocket},
