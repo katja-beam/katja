@@ -160,7 +160,8 @@ maybe_connect_tcp(#connection_state{host=Host, port=Port}=S) ->
     {ok, Socket} ->
       S2 = S#connection_state{tcp_socket=Socket},
       {ok, S2};
-    {error, _Reason}=E -> E
+    {error, _Reason} ->
+      {ok, S#connection_state{tcp_socket=undefined}}
   end.
 
 -spec send_message_transport(binary()) -> transport().
@@ -180,8 +181,13 @@ send_message_udp(Msg, #connection_state{host=Host, port=Port, udp_socket=Socket}
     {error, _Reason}=E -> {E, S}
   end.
 
+connect_and_send(Msg, S=#connection_state{host=Host, port=Port}) ->
+  {ok, #connection_state{tcp_socket=NewSocket}} = connect_tcp(Host, Port),
+  S2 = S#connection_state{tcp_socket=NewSocket},
+  send_message_tcp(Msg, S2).
+
 -spec send_message_tcp(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
-send_message_tcp(Msg, #connection_state{host=Host, port=Port, tcp_socket=Socket}=S) when Socket =/= undefined ->
+send_message_tcp(Msg, #connection_state{tcp_socket=Socket}=S) when Socket =/= undefined ->
   MsgSize = byte_size(Msg),
   Msg2 = <<MsgSize:32/integer-big, Msg/binary>>,
   case gen_tcp:send(Socket, Msg2) of
@@ -193,16 +199,11 @@ send_message_tcp(Msg, #connection_state{host=Host, port=Port, tcp_socket=Socket}
     {error, Reason} when Reason == econnrefused orelse
                          Reason == closed orelse
                          Reason == timeout  ->
-      case connect_tcp(Host, Port) of
-        {ok, #connection_state{tcp_socket=NewSocket}} ->
-          S2 = S#connection_state{tcp_socket=NewSocket},
-          send_message_tcp(Msg, S2);
-        {error, _Reason}=E ->
-          S2 = S#connection_state{tcp_socket=undefined},
-          {E, S2}
-      end;
+      connect_and_send(Msg, S);
     {error, _Reason}=E -> {E, S}
-  end.
+  end;
+send_message_tcp(Msg, #connection_state{tcp_socket=undefined}=S) ->
+  connect_and_send(Msg, S).
 
 -spec receive_reply_tcp(gen_tcp:socket()) -> {ok, term()} | {error, term()}.
 receive_reply_tcp(Socket) ->
@@ -210,7 +211,7 @@ receive_reply_tcp(Socket) ->
 
 -spec receive_reply_tcp(gen_tcp:socket(), binary()) -> {ok, term()} | {error, term()}.
 receive_reply_tcp(Socket, Buffer) ->
-  case gen_tcp:recv(Socket, 0, 5000) of
+  case gen_tcp:recv(Socket, 0, 4000) of
     {ok, BinMsg} ->
       BinMsg2 = <<Buffer/binary, BinMsg/binary>>,
       case decode_message(BinMsg2) of
