@@ -263,7 +263,10 @@ set_state_field(once, V, S) -> S#riemannpb_state{once=V}.
 default_hostname() ->
   Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
   case lists:keyfind(host, 1, Defaults) of
-    {host, node_name} -> atom_to_list(node());
+    {host, node_name} -> atom_to_binary(node(), utf8);
+    {host, vm_name} ->
+      Node = atom_to_binary(node(), utf8),
+      re:replace(Node, "@", ".");
     {host, Host} -> Host;
     false ->
       {ok, Host} = inet:gethostname(),
