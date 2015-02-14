@@ -233,7 +233,7 @@ set_event_field(host, undefined, E) -> E#riemannpb_event{host=default_hostname()
 set_event_field(host, V, E) -> E#riemannpb_event{host=V};
 set_event_field(description, V, E) -> E#riemannpb_event{description=V};
 set_event_field(tags, undefined, E) -> E#riemannpb_event{tags=default_tags()};
-set_event_field(tags, V, E) -> E#riemannpb_event{tags=V};
+set_event_field(tags, V, E) -> E#riemannpb_event{tags=tag_values(V) ++ default_tags()};
 set_event_field(ttl, undefined, E) -> E#riemannpb_event{ttl=default_ttl()};
 set_event_field(ttl, V, E) -> E#riemannpb_event{ttl=V};
 set_event_field(attributes, undefined, E) -> E#riemannpb_event{attributes=[]};
@@ -254,7 +254,7 @@ set_state_field(host, undefined, S) -> S#riemannpb_state{host=default_hostname()
 set_state_field(host, V, S) -> S#riemannpb_state{host=V};
 set_state_field(description, V, S) -> S#riemannpb_state{description=V};
 set_state_field(tags, undefined, S) -> S#riemannpb_state{tags=default_tags()};
-set_state_field(tags, V, S) -> S#riemannpb_state{tags=tag_values(V)};
+set_state_field(tags, V, S) -> S#riemannpb_state{tags=tag_values(V) ++ default_tags()};
 set_state_field(ttl, undefined, S) -> S#riemannpb_state{ttl=default_ttl()};
 set_state_field(ttl, V, S) -> S#riemannpb_state{ttl=V};
 set_state_field(once, V, S) -> S#riemannpb_state{once=V}.
@@ -346,7 +346,11 @@ create_event_test() ->
   ?assertMatch(#riemannpb_event{metric_f=2.0, metric_d=2.0}, create_event(?TEST_DATA ++ [{metric, 2.0}])),
   ?assertMatch(#riemannpb_event{ttl=900.1, attributes=[#riemannpb_attribute{key="foo", value="bar"}]},
                create_event(?TEST_DATA ++ [{ttl, 900.1}, {attributes, [{"foo", "bar"}]}])),
-  ?assertMatch(#riemannpb_event{time=undefined}, create_event([{time, riemann}])).
+  ?assertMatch(#riemannpb_event{time=undefined}, create_event([{time, riemann}])),
+  ok = application:set_env(katja, defaults, [{tags, [instance]}]),
+  TagEvent = create_event(?TEST_DATA),
+  ?assert(length(TagEvent#riemannpb_event.tags) =:= 3),
+  ok = application:unset_env(katja, defaults).
 
 create_state_test() ->
   DefaultHost = default_hostname(),
@@ -374,21 +378,22 @@ default_hostname_test() ->
   ok = application:set_env(katja, defaults, [{host, Host}]),
   ?assertEqual(Host, default_hostname()),
   ok = application:unset_env(katja, defaults),
-  ?assertNotEqual(Host, default_hostname()),
   ok = application:set_env(katja, defaults, [{host, node_name}]),
   ?assertEqual(atom_to_binary(node(), utf8), default_hostname()),
   ok = application:set_env(katja, defaults, [{host, vm_name}]),
-  ?assert(is_list(default_hostname())).
+  ?assert(is_list(default_hostname())),
+  ok = application:unset_env(katja, defaults),
+  ?assertNotEqual(Host, default_hostname()).
 
 default_tags_test() ->
   Tags = ["some", "tags"],
   ok = application:set_env(katja, defaults, [{tags, Tags}]),
   ?assertEqual(Tags, default_tags()),
-  ok = application:unset_env(katja, defaults),
-  ?assertEqual([], default_tags()),
   ok = application:set_env(katja, defaults, [{tags, [instance]}]),
   [InstanceTag] = default_tags(),
-  ?assertEqual("instance: ", hd(InstanceTag)).
+  ?assertEqual("instance: ", hd(InstanceTag)),
+  ok = application:unset_env(katja, defaults),
+  ?assertEqual([], default_tags()).
 
 default_ttl_test() ->
   TTL = 60.0,
