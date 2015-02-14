@@ -2,9 +2,10 @@
 
 ## 0.8
 
-* The `hostname` field of an entity can now default to `node()` (`node_name`) or the name of VM (`vm_name`), where VM name is defined as `node()` with a `.` instead of an `@` (thanks [dch](https://github.com/dch))
-* A tag of `instance` (atom) will tag entities with "instance: *XXX*", where *XXX* refers to the first part of the name of the VM (thanks [dch](https://github.com/dch))
+* The `hostname` field of an entity can now default to `node()` (`node_name`) or the name of VM (`vm_name`), where VM name is defined as `node()` with a `.` instead of an `@` (thanks [@dch](https://github.com/dch))
+* A tag of `instance` (atom) will tag entities with "instance: *XXX*", where *XXX* refers to the first part of the name of the VM (thanks [@dch](https://github.com/dch))
 * Default tags will now be appended to any tags supplied on a per-call basis
+* Decrease TCP `recv` timeout, so that it does not clash with the `gen_server:call` timeout (thanks [@puzza007](https://github.com/puzza007))
 
 ## 0.7.1
 
