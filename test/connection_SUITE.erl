@@ -42,12 +42,14 @@ all() ->
 connect(_Config) ->
   {ok, State} = katja_connection:connect(),
   ok = katja_connection:disconnect(State),
-  {error, _Reason} = katja_connection:connect("10.99.99.99", 9001).
+  {ok, ErrorState} = katja_connection:connect("10.99.99.99", 9001),
+  undefined = element(2, ErrorState).
 
 connect_tcp(_Config) ->
   {ok, State} = katja_connection:connect_tcp(),
   ok = katja_connection:disconnect(State),
-  {error, _Reason} = katja_connection:connect_tcp("10.99.99.99", 9001).
+  {ok, ErrorState} = katja_connection:connect_tcp("10.99.99.99", 9001),
+  undefined = element(2, ErrorState).
 
 connect_udp(_Config) ->
   {ok, State} = katja_connection:connect_udp(),
