@@ -29,7 +29,7 @@ This is alpha software. Things might still change in ways that break everything.
 
 **transport**: The message transport that should be used (supported: `detect`, `udp`, `tcp`)
 
-**pool**: List of processes that should not be started (and supervised) by Katja
+**pool**: List of processes that should not be started (and supervised) by Katja (supported: `katja_reader`, `katja_writer`)
 
 **defaults**: Property list with default values for events and states (supported: `host`, `tags`, `ttl`)
 

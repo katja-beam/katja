@@ -297,6 +297,8 @@ tag_value(instance) ->
   Node = atom_to_binary(node(), utf8),
   Name = hd(binary:split(Node, <<"@">>)),
   ["instance: ", Name];
+tag_value(Tag) when is_atom(Tag) ->
+  atom_to_binary(Tag, utf8);
 tag_value(Tag) ->
   Tag.
 

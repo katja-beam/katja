@@ -13,7 +13,18 @@
 % @version {@version}
 % @doc This is the main module of the Katja application: It provides the public API.<br />
 %      While it is possible to use `katja_writer' and `katja_reader' directly, the recommended way is to use the functions defined
-%      in this module instead.
+%      in this module instead.<br /><br />
+%
+%      Configuration:<br />
+%      `host': Host Riemann is running on<br />
+%      `port': Port Riemann is listening on<br />
+%      `transport': The message transport that should be used (supported: `detect', `udp', `tcp')<br />
+%      `pool':  List of processes that should not be started (and supervised) by Katja (supported: `katja_reader', `katja_writer')<br />
+%      `defaults': Property list with default values for events and states (supported: `host', `tags', `ttl')<br /><br />
+%
+%      The `defaults' property list supports some special values for certain keys.<br />
+%      `host': A value of `node_name' or `vm_name' will automatically set it to the value of `node()' or the name of the VM respectively<br />
+%      `tags': A value of `instance' will automatically be converted to <em>instance: `VM_NAME'</em>
 
 -module(katja).
 
@@ -22,9 +33,9 @@
 -type riemann_time() :: {time, non_neg_integer() | riemann}.
 -type riemann_state() :: {state, iolist()}.
 -type riemann_service() :: {service, iolist()}.
--type riemann_host() :: {host, iolist()}.
+-type riemann_host() :: {host, iolist() | node_name | vm_name}.
 -type riemann_description() :: {description, iolist()}.
--type riemann_tags() :: {tags, [iolist()]}.
+-type riemann_tags() :: {tags, [iolist() | atom()]}.
 -type riemann_ttl() :: {ttl, float()}.
 -type riemann_attributes() :: {attributes, [{iolist(), iolist()}]}.
 -type riemann_metric() :: {metric, number()}.
