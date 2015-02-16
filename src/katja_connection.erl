@@ -216,8 +216,12 @@ send_message_tcp(Msg, #connection_state{tcp_socket=Socket}=S) when is_port(Socke
     {error, Reason} when Reason == econnrefused orelse
                          Reason == closed orelse
                          Reason == timeout ->
+      ok = gen_tcp:close(Socket),
       maybe_connect_and_send_tcp(Msg, S);
-    {error, _Reason}=E -> {E, S}
+    {error, _Reason}=E ->
+      ok = gen_tcp:close(Socket),
+      S2 = S#connection_state{tcp_socket=undefined},
+      {E, S2}
   end;
 send_message_tcp(Msg, #connection_state{transport=Transport, tcp_socket=undefined}=S) when Transport == tcp orelse
                                                                                            Transport == detect ->
