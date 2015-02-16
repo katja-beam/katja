@@ -230,7 +230,7 @@ set_event_field(time, V, E) -> E#riemannpb_event{time=V};
 set_event_field(state, V, E) -> E#riemannpb_event{state=V};
 set_event_field(service, V, E) -> E#riemannpb_event{service=V};
 set_event_field(host, undefined, E) -> E#riemannpb_event{host=default_hostname()};
-set_event_field(host, V, E) -> E#riemannpb_event{host=V};
+set_event_field(host, V, E) -> E#riemannpb_event{host=hostname_value(V)};
 set_event_field(description, V, E) -> E#riemannpb_event{description=V};
 set_event_field(tags, undefined, E) -> E#riemannpb_event{tags=default_tags()};
 set_event_field(tags, V, E) -> E#riemannpb_event{tags=lists:append(tag_values(V), default_tags())};
@@ -251,7 +251,7 @@ set_state_field(time, V, S) -> S#riemannpb_state{time=V};
 set_state_field(state, V, S) -> S#riemannpb_state{state=V};
 set_state_field(service, V, S) -> S#riemannpb_state{service=V};
 set_state_field(host, undefined, S) -> S#riemannpb_state{host=default_hostname()};
-set_state_field(host, V, S) -> S#riemannpb_state{host=V};
+set_state_field(host, V, S) -> S#riemannpb_state{host=hostname_value(V)};
 set_state_field(description, V, S) -> S#riemannpb_state{description=V};
 set_state_field(tags, undefined, S) -> S#riemannpb_state{tags=default_tags()};
 set_state_field(tags, V, S) -> S#riemannpb_state{tags=lists:append(tag_values(V), default_tags())};
@@ -263,11 +263,7 @@ set_state_field(once, V, S) -> S#riemannpb_state{once=V}.
 default_hostname() ->
   Defaults = application:get_env(katja, defaults, ?DEFAULT_DEFAULTS),
   case lists:keyfind(host, 1, Defaults) of
-    {host, node_name} -> atom_to_binary(node(), utf8);
-    {host, vm_name} ->
-      Node = atom_to_binary(node(), utf8),
-      re:replace(Node, "@", ".");
-    {host, Host} -> Host;
+    {host, Host} -> hostname_value(Host);
     false ->
       {ok, Host} = inet:gethostname(),
       Host
@@ -289,6 +285,13 @@ default_ttl() ->
     false -> undefined
   end.
 
+-spec hostname_value(iolist() | node_name | vm_name) -> iolist().
+hostname_value(node_name) -> atom_to_binary(node(), utf8);
+hostname_value(vm_name) ->
+  Node = atom_to_binary(node(), utf8),
+  re:replace(Node, "@", ".");
+hostname_value(Host) -> Host.
+
 -spec tag_values([iolist() | atom()]) -> [iolist()].
 tag_values(Tags) -> [tag_value(T) || T <- Tags].
 
@@ -297,10 +300,8 @@ tag_value(instance) ->
   Node = atom_to_binary(node(), utf8),
   Name = hd(binary:split(Node, <<"@">>)),
   ["instance: ", Name];
-tag_value(Tag) when is_atom(Tag) ->
-  atom_to_binary(Tag, utf8);
-tag_value(Tag) ->
-  Tag.
+tag_value(Tag) when is_atom(Tag) -> atom_to_binary(Tag, utf8);
+tag_value(Tag) -> Tag.
 
 -spec current_timestamp() -> pos_integer().
 current_timestamp() ->
@@ -403,4 +404,7 @@ default_ttl_test() ->
   ?assertEqual(TTL, default_ttl()),
   ok = application:unset_env(katja, defaults),
   ?assertEqual(undefined, default_ttl()).
+
+tag_value_test() ->
+  ?assertEqual(<<"foo">>, tag_value(foo)).
 -endif.
