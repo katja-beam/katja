@@ -145,16 +145,20 @@ send_message(tcp, Msg, State) -> send_message_tcp(Msg, State).
 % Private
 
 -spec maybe_connect_udp(state()) -> {ok, state()} | {error, term()}.
-maybe_connect_udp(State) ->
+maybe_connect_udp(#connection_state{transport=Transport}=S) when Transport == udp orelse
+                                                                 Transport == detect ->
   case gen_udp:open(0, [binary, {active, false}]) of
     {ok, Socket} ->
-      State2 = State#connection_state{udp_socket=Socket},
-      {ok, State2};
+      S2 = S#connection_state{udp_socket=Socket},
+      {ok, S2};
     {error, _Reason}=E -> E
-  end.
+  end;
+maybe_connect_udp(State) ->
+  State.
 
 -spec maybe_connect_tcp(state()) -> {ok, state()} | {error, term()}.
-maybe_connect_tcp(#connection_state{host=Host, port=Port}=S) ->
+maybe_connect_tcp(#connection_state{host=Host, port=Port, transport=Transport}=S) when Transport == tcp orelse
+                                                                                       Transport == detect ->
   Options = [binary, {active, false}, {nodelay, true}],
   case gen_tcp:connect(Host, Port, Options, 5000) of
     {ok, Socket} ->
@@ -166,20 +170,20 @@ maybe_connect_tcp(#connection_state{host=Host, port=Port}=S) ->
       S2 = S#connection_state{tcp_socket=undefined},
       {ok, S2};
     {error, _Reason}=E -> E
-  end.
+  end;
+maybe_connect_tcp(State) ->
+  State.
 
 -spec maybe_connect_and_send_tcp(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
-maybe_connect_and_send_tcp(Msg, #connection_state{host=Host, port=Port}=S) ->
-  case connect_tcp(Host, Port) of
-    {ok, #connection_state{tcp_socket=Socket}} when Socket =/= undefined ->
-      S2 = S#connection_state{tcp_socket=Socket},
+maybe_connect_and_send_tcp(Msg, State) ->
+  case maybe_connect_tcp(State) of
+    {ok, #connection_state{tcp_socket=Socket}=S2} when is_port(Socket) ->
       send_message_tcp(Msg, S2);
-    {ok, #connection_state{tcp_socket=undefined}} ->
-      S2 = S#connection_state{tcp_socket=undefined},
+    {ok, #connection_state{tcp_socket=undefined}=S2} ->
       {{error, too_many_tries}, S2};
     {error, _Reason}=E ->
-      S2 = S#connection_state{tcp_socket=undefined},
-      {E, S2}
+      State2 = State#connection_state{tcp_socket=undefined},
+      {E, State2}
   end.
 
 -spec send_message_transport(binary()) -> transport().
@@ -191,7 +195,7 @@ send_message_transport(Msg) ->
   end.
 
 -spec send_message_udp(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
-send_message_udp(Msg, #connection_state{host=Host, port=Port, udp_socket=Socket}=S) when Socket =/= undefined ->
+send_message_udp(Msg, #connection_state{host=Host, port=Port, udp_socket=Socket}=S) when is_port(Socket) ->
   case gen_udp:send(Socket, Host, Port, Msg) of
     ok ->
       RetMsg = #riemannpb_msg{ok=true},
@@ -200,7 +204,7 @@ send_message_udp(Msg, #connection_state{host=Host, port=Port, udp_socket=Socket}
   end.
 
 -spec send_message_tcp(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
-send_message_tcp(Msg, #connection_state{tcp_socket=Socket}=S) when Socket =/= undefined ->
+send_message_tcp(Msg, #connection_state{tcp_socket=Socket}=S) when is_port(Socket) ->
   MsgSize = byte_size(Msg),
   Msg2 = <<MsgSize:32/integer-big, Msg/binary>>,
   case gen_tcp:send(Socket, Msg2) of
@@ -215,7 +219,7 @@ send_message_tcp(Msg, #connection_state{tcp_socket=Socket}=S) when Socket =/= un
       maybe_connect_and_send_tcp(Msg, S);
     {error, _Reason}=E -> {E, S}
   end;
-send_message_tcp(Msg, #connection_state{tcp_socket=undefined}=S) ->
+send_message_tcp(Msg, #connection_state{transport=Transport, tcp_socket=undefined}=S) when Transport =/= udp ->
   maybe_connect_and_send_tcp(Msg, S).
 
 -spec receive_reply_tcp(gen_tcp:socket()) -> {ok, term()} | {error, term()}.
@@ -253,7 +257,7 @@ disconnect_test() ->
   ?assertEqual(ok, disconnect(#connection_state{udp_socket=Socket})).
 
 maybe_connect_and_send_tcp_test_() ->
-  State = #connection_state{host="10.99.99.99", port=9001, tcp_socket=undefined},
+  State = #connection_state{host="10.99.99.99", port=9001, transport=tcp, tcp_socket=undefined},
   {timeout, 10, ?_assertMatch({{error, too_many_tries}, _State2},  maybe_connect_and_send_tcp(<<>>, State))}.
 
 send_message_transport_test() ->
@@ -263,7 +267,7 @@ send_message_transport_test() ->
   ?assertEqual(udp, send_message_transport(binary:part(BinData, 0, byte_size(BinData) - 1))).
 
 send_message_tcp_test_() ->
-  State = #connection_state{host="10.99.99.99", port=9001, tcp_socket=undefined},
+  State = #connection_state{host="10.99.99.99", port=9001, transport=tcp, tcp_socket=undefined},
   {timeout, 10, ?_assertMatch({{error, too_many_tries}, _State2},  send_message_tcp(<<>>, State))}.
 
 decode_message_test() ->

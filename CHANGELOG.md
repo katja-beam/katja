@@ -7,6 +7,8 @@
 * Default tags will now be appended to any tags supplied on a per-call basis
 * Decrease TCP `recv` timeout, so that it does not clash with the `gen_server:call` timeout (thanks [@puzza007](https://github.com/puzza007))
 * Handle connection failures on start (thanks [@puzza007](https://github.com/puzza007))
+* Stop trying to connect via UDP if the `transport` configuration option was set to `tcp`
+* Stop trying to connect via TCP if the `transport` configuration option was set to `udp`
 
 ## 0.7.1
 
