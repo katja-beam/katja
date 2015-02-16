@@ -219,7 +219,8 @@ send_message_tcp(Msg, #connection_state{tcp_socket=Socket}=S) when is_port(Socke
       maybe_connect_and_send_tcp(Msg, S);
     {error, _Reason}=E -> {E, S}
   end;
-send_message_tcp(Msg, #connection_state{transport=Transport, tcp_socket=undefined}=S) when Transport =/= udp ->
+send_message_tcp(Msg, #connection_state{transport=Transport, tcp_socket=undefined}=S) when Transport == tcp orelse
+                                                                                           Transport == detect ->
   maybe_connect_and_send_tcp(Msg, S).
 
 -spec receive_reply_tcp(gen_tcp:socket()) -> {ok, term()} | {error, term()}.
