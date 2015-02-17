@@ -69,9 +69,9 @@ init_per_suite(Config) ->
   ok = katja:start(),
   Config.
 
-init_per_testcase(Test, Config) when Test =:= send_events_pid; Test =:= send_events_tcp; Test =:= send_events_udp; Test =:= send_events_async;
-                                     Test =:= send_states_pid; Test =:= send_states_tcp; Test =:= send_states_udp; Test =:= send_states_async;
-                                     Test =:= send_entities_pid; Test =:= send_entities_async; Test =:= ignore_unknown_messages ->
+init_per_testcase(Test, Config) when Test == send_events_pid; Test == send_events_tcp; Test == send_events_udp; Test == send_events_async;
+                                     Test == send_states_pid; Test == send_states_tcp; Test == send_states_udp; Test == send_states_async;
+                                     Test == send_entities_pid; Test == send_entities_async; Test == ignore_unknown_messages ->
   {ok, WPid} = katja_writer:start_link(),
   [{pid_writer, WPid} | Config];
 init_per_testcase(_Test, Config) ->
@@ -81,9 +81,9 @@ end_per_suite(_Config) ->
   ok = katja:stop(),
   ok.
 
-end_per_testcase(Test, Config) when Test =:= send_events_pid; Test =:= send_events_tcp; Test =:= send_events_udp; Test =:= send_events_async;
-                                    Test =:= send_states_pid; Test =:= send_states_tcp; Test =:= send_states_udp; Test =:= send_states_async;
-                                    Test =:= send_entities_pid; Test =:= send_entities_async; Test =:= ignore_unknown_messages ->
+end_per_testcase(Test, Config) when Test == send_events_pid; Test == send_events_tcp; Test == send_events_udp; Test == send_events_async;
+                                    Test == send_states_pid; Test == send_states_tcp; Test == send_states_udp; Test == send_states_async;
+                                    Test == send_entities_pid; Test == send_entities_async; Test == ignore_unknown_messages ->
   WPid = ?config(pid_writer, Config),
   ok = katja_writer:stop(WPid),
   ok;

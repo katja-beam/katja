@@ -57,7 +57,7 @@ init_per_suite(Config) ->
   ok = setup_events(),
   Config.
 
-init_per_testcase(Test, Config) when Test =:= query_pid; Test =:= query_event_pid; Test =:= ignore_unknown_messages ->
+init_per_testcase(Test, Config) when Test == query_pid; Test == query_event_pid; Test == ignore_unknown_messages ->
   {ok, RPid} = katja_reader:start_link(),
   [{pid_reader, RPid} | Config];
 init_per_testcase(_Test, Config) ->
@@ -67,7 +67,7 @@ end_per_suite(_Config) ->
   ok = katja:stop(),
   ok.
 
-end_per_testcase(Test, Config) when Test =:= query_pid; Test =:= query_event_pid; Test =:= ignore_unknown_messages ->
+end_per_testcase(Test, Config) when Test == query_pid; Test == query_event_pid; Test == ignore_unknown_messages ->
   RPid = ?config(pid_reader, Config),
   ok = katja_reader:stop(RPid),
   ok;

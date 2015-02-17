@@ -154,7 +154,7 @@ maybe_connect_udp(#connection_state{transport=Transport}=S) when Transport == ud
     {error, _Reason}=E -> E
   end;
 maybe_connect_udp(State) ->
-  State.
+  {ok, State}.
 
 -spec maybe_connect_tcp(state()) -> {ok, state()} | {error, term()}.
 maybe_connect_tcp(#connection_state{host=Host, port=Port, transport=Transport}=S) when Transport == tcp orelse
@@ -172,7 +172,7 @@ maybe_connect_tcp(#connection_state{host=Host, port=Port, transport=Transport}=S
     {error, _Reason}=E -> E
   end;
 maybe_connect_tcp(State) ->
-  State.
+  {ok, State}.
 
 -spec maybe_connect_and_send_tcp(binary(), state()) -> {{ok, riemannpb_message()}, state()} | {{error, term()}, state()}.
 maybe_connect_and_send_tcp(Msg, State) ->
@@ -260,6 +260,14 @@ disconnect_test() ->
   ?assertEqual(ok, disconnect(#connection_state{})),
   {ok, Socket} = gen_udp:open(0, [binary, {active, false}]),
   ?assertEqual(ok, disconnect(#connection_state{udp_socket=Socket})).
+
+maybe_connect_udp_test() ->
+  State = #connection_state{transport=tcp},
+  ?assertMatch({ok, State}, maybe_connect_udp(State)).
+
+maybe_connect_tcp_test() ->
+  State = #connection_state{transport=udp},
+  ?assertMatch({ok, State}, maybe_connect_tcp(State)).
 
 maybe_connect_and_send_tcp_test_() ->
   State = #connection_state{host="10.99.99.99", port=9001, transport=tcp, tcp_socket=undefined},

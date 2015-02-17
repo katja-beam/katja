@@ -16,7 +16,9 @@
 
 % Common Test
 -export([
-  all/0
+  all/0,
+  init_per_testcase/2,
+  end_per_testcase/2
 ]).
 
 % Tests
@@ -24,7 +26,9 @@
   connect/1,
   connect_tcp/1,
   connect_udp/1,
-  send_invalid_tcp/1
+  send_invalid_tcp/1,
+  send_invalid_config_tcp/1,
+  send_invalid_config_udp/1
 ]).
 
 % Common Test
@@ -34,8 +38,24 @@ all() ->
     connect,
     connect_tcp,
     connect_udp,
-    send_invalid_tcp
+    send_invalid_tcp,
+    send_invalid_config_tcp,
+    send_invalid_config_udp
   ].
+
+init_per_testcase(send_invalid_config_tcp, Config) ->
+  ok = application:set_env(katja, transport, tcp),
+  Config;
+init_per_testcase(send_invalid_config_udp, Config) ->
+  ok = application:set_env(katja, transport, udp),
+  Config;
+init_per_testcase(_Test, Config) ->
+  Config.
+
+end_per_testcase(Test, _Config) when Test == send_invalid_config_tcp; Test == send_invalid_config_udp  ->
+  application:unset_env(katja, transport);
+end_per_testcase(_Test, _Config) ->
+  ok.
 
 % Tests
 
@@ -60,3 +80,16 @@ send_invalid_tcp(_Config) ->
   {{error, closed}, State2} = katja_connection:send_message(tcp, <<"invalid">>, State),
   {{error, closed}, State3} = katja_connection:send_message(tcp, <<"still invalid">>, State2),
   ok = katja_connection:disconnect(State3).
+
+send_invalid_config_tcp(_Config) ->
+  {ok, State} = katja_connection:connect(),
+  {{error, closed}, State2} = katja_connection:send_message(config, <<"invalid">>, State),
+  {{error, closed}, State3} = katja_connection:send_message(config, iolist_to_binary(lists:duplicate(5120, "abcd")), State2),
+  ok = katja_connection:disconnect(State3).
+
+send_invalid_config_udp(_Config) ->
+  {ok, State} = katja_connection:connect(),
+  {{ok, _Rep}, State2} = katja_connection:send_message(config, <<"invalid">>, State),
+  {{error, emsgsize}, State3} = katja_connection:send_message(config, iolist_to_binary(lists:duplicate(5120, "abcd")), State2),
+  {{ok, _Rep}, State4} = katja_connection:send_message(config, <<"invalid">>, State3),
+  ok = katja_connection:disconnect(State4).
