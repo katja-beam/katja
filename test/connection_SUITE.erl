@@ -90,6 +90,5 @@ send_invalid_config_tcp(_Config) ->
 send_invalid_config_udp(_Config) ->
   {ok, State} = katja_connection:connect(),
   {{ok, _Rep}, State2} = katja_connection:send_message(config, <<"invalid">>, State),
-  {{error, emsgsize}, State3} = katja_connection:send_message(config, iolist_to_binary(lists:duplicate(5120, "abcd")), State2),
-  {{ok, _Rep}, State4} = katja_connection:send_message(config, <<"invalid">>, State3),
+  {{ok, _Rep}, State4} = katja_connection:send_message(config, <<"still invalid">>, State3),
   ok = katja_connection:disconnect(State4).
