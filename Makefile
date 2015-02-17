@@ -64,7 +64,7 @@ coverage-report: $(shell ls -1rt `find logs -type f -name \*.coverdata 2>/dev/nu
 	$(gen_verbose) erl -noshell -pa ebin deps/*/ebin -eval 'ecoveralls:travis_ci("$?"), init:stop()'
 
 upload-docs: docs
-	$(gen_verbose) rsync -avz --no-o --no-g -e ssh --chmod=og=r -p --delete --exclude '*.edoc' --exclude 'edoc-info' doc/ kempkens:/var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION)
-	@ssh kempkens chown -R www-data:www-data /var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION)
+	$(gen_verbose) rsync -avz --no-o --no-g -e ssh --chmod=og=r -p --delete --exclude '*.edoc' --exclude 'edoc-info' doc/ webserver.kempkens.io:/var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION)
+	@ssh webserver.kempkens.io chown -R www:www /var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION)
 
 .PHONY: clean-proto coverage-report upload-docs
