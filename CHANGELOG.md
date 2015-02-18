@@ -2,6 +2,8 @@
 
 ## 0.8
 
+[Documentation](http://katja.nifoc.pw/0.8/)
+
 * The `hostname` field of an entity can now default to `node()` (`node_name`) or the name of VM (`vm_name`), where VM name is defined as `node()` with a `.` instead of an `@` (thanks [@dch](https://github.com/dch))
 * A tag of `instance` (atom) will tag entities with "instance: *XXX*", where *XXX* refers to the first part of the name of the VM (thanks [@dch](https://github.com/dch))
 * Default tags will now be appended to any tags supplied on a per-call basis
