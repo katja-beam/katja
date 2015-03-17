@@ -56,9 +56,11 @@ start_link() ->
   gen_server:start_link(?MODULE, [], []).
 
 % @doc Starts a writer server process and registers it as `{@module}'.
--spec start_link(register) -> {ok, pid()} | ignore | {error, term()}.
+-spec start_link(register | [{atom(), term()}]) -> {ok, pid()} | ignore | {error, term()}.
 start_link(register) ->
-  gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+  gen_server:start_link({local, ?MODULE}, ?MODULE, [], []);
+start_link(Args) ->
+  gen_server:start_link(?MODULE, [], Args).
 
 % @doc Stops a writer server process.
 -spec stop(katja:process()) -> ok.
@@ -139,9 +141,12 @@ send_entities_async(Pid, Transport, Data, SampleRate) ->
 % gen_server
 
 % @hidden
-init([]) ->
-  {ok, State} = katja_connection:connect(),
-  {ok, State}.
+init([]) -> katja_connection:connect();
+init(Args) ->
+  Host = proplists:get_value(host, Args),
+  Port = proplists:get_value(port, Args),
+  Transport = proplists:get_value(transport, Args, detect),
+  katja_connection:connect(Host, Port, Transport).
 
 % @hidden
 handle_call({send_message, Transport, _Type, Data}, _From, State) ->

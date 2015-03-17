@@ -60,9 +60,11 @@ start_link() ->
   gen_server:start_link(?MODULE, [], []).
 
 % @doc Starts a reader server process and registers it as `{@module}'.
--spec start_link(register) -> {ok, pid()} | ignore | {error, term()}.
+-spec start_link(register | [{atom(), term()}]) -> {ok, pid()} | ignore | {error, term()}.
 start_link(register) ->
-  gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+  gen_server:start_link({local, ?MODULE}, ?MODULE, [], []);
+start_link(Args) ->
+  gen_server:start_link(?MODULE, [], Args).
 
 % @doc Stops a reader server process.
 -spec stop(katja:process()) -> ok.
@@ -105,9 +107,11 @@ query_event_async(Pid, Event) ->
 % gen_server
 
 % @hidden
-init([]) ->
-  {ok, State} = katja_connection:connect_tcp(),
-  {ok, State}.
+init([]) -> katja_connection:connect_tcp();
+init(Args) ->
+  Host = proplists:get_value(host, Args),
+  Port = proplists:get_value(port, Args),
+  katja_connection:connect_tcp(Host, Port).
 
 % @hidden
 handle_call({query, Msg}, _From, State) ->

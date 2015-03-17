@@ -49,6 +49,7 @@
 -export([
   connect/0,
   connect/2,
+  connect/3,
   connect_udp/0,
   connect_udp/2,
   connect_tcp/0,
@@ -71,11 +72,20 @@ connect() ->
   connect(Host, Port).
 
 % @doc Tries to connect to Riemann via UDP and TCP using the specified `Host' and `Port'.<br />
-%      A default message transport can be set using the application configuration. This only affects
-%      entities (events and/or states) that are sent to Riemann, since querying always uses TCP.
+%      A default message transport can be set using the application configuration.
+%      Delegates to {@link connect/3}.<br /><br />
+%      <strong>Defaults</strong><br />
+%      `Transport': `detect'<br />
 -spec connect(string(), pos_integer()) -> {ok, state()} | {error, term()}.
 connect(Host, Port) ->
   Transport = application:get_env(katja, transport, ?DEFAULT_TRANSPORT),
+  connect(Host, Port, Transport).
+
+% @doc Tries to connect to Riemann via UDP and TCP using the specified `Host' and `Port' and `Transport'.<br />
+%      The `Transport' option only affects entities (events and/or states) that are sent to Riemann,
+%      since querying always uses TCP.
+-spec connect(string(), pos_integer(), transport()) -> {ok, state()} | {error, term()}.
+connect(Host, Port, Transport) ->
   State = #connection_state{host=Host, port=Port, transport=Transport},
   case maybe_connect_udp(State) of
     {ok, State2} -> maybe_connect_tcp(State2);
