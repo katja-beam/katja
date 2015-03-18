@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9
+
+* Improve pooling support
+
 ## 0.8
 
 [Documentation](http://katja.nifoc.pw/0.8/)
