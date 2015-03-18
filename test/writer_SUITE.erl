@@ -17,10 +17,13 @@
 % Common Test
 -export([
   all/0,
+  groups/0,
   init_per_suite/1,
+  init_per_group/2,
   init_per_testcase/2,
-  end_per_suite/1,
-  end_per_testcase/2
+  end_per_testcase/2,
+  end_per_group/2,
+  end_per_suite/1
 ]).
 
 % Tests
@@ -47,47 +50,78 @@
 
 all() ->
   [
-    send_event,
-    send_events,
-    send_events_pid,
-    send_events_tcp,
-    send_events_udp,
-    send_events_async,
-    send_state,
-    send_states,
-    send_states_pid,
-    send_states_tcp,
-    send_states_udp,
-    send_states_async,
-    send_entities,
-    send_entities_pid,
-    send_entities_async,
-    ignore_unknown_messages
+    {group, normal},
+    {group, process},
+    {group, process_args}
+  ].
+
+groups() ->
+  [
+    {normal, [], [
+      send_event,
+      send_events,
+      send_state,
+      send_states,
+      send_entities
+    ]},
+    {process, [], [
+      send_events_pid,
+      send_events_tcp,
+      send_events_udp,
+      send_events_async,
+      send_states_pid,
+      send_states_tcp,
+      send_states_udp,
+      send_states_async,
+      send_entities_pid,
+      send_entities_async,
+      ignore_unknown_messages
+    ]},
+    {process_args, [], [
+      send_events_pid,
+      send_events_tcp,
+      send_events_udp,
+      send_events_async,
+      send_states_pid,
+      send_states_tcp,
+      send_states_udp,
+      send_states_async,
+      send_entities_pid,
+      send_entities_async,
+      ignore_unknown_messages
+    ]}
   ].
 
 init_per_suite(Config) ->
   ok = katja:start(),
   Config.
 
-init_per_testcase(Test, Config) when Test == send_events_pid; Test == send_events_tcp; Test == send_events_udp; Test == send_events_async;
-                                     Test == send_states_pid; Test == send_states_tcp; Test == send_states_udp; Test == send_states_async;
-                                     Test == send_entities_pid; Test == send_entities_async; Test == ignore_unknown_messages ->
-  {ok, WPid} = katja_writer:start_link(),
-  [{pid_writer, WPid} | Config];
+init_per_group(Group, Config) -> [{writer_type, Group} | Config].
+
 init_per_testcase(_Test, Config) ->
-  Config.
+  case ?config(writer_type, Config) of
+    process ->
+      {ok, WPid} = katja_writer:start_link(),
+      [{pid_writer, WPid} | Config];
+    process_args ->
+      {ok, WPid} = katja_writer:start_link([{host, "127.0.0.1"}, {port, 5555}]),
+      [{pid_writer, WPid} | Config];
+    _ -> Config
+  end.
+
+end_per_testcase(_Test, Config) ->
+  case ?config(writer_type, Config) of
+    Type when Type == process, Type == process_args ->
+      WPid = ?config(pid_writer, Config),
+      ok = katja_writer:stop(WPid),
+      ok;
+    _ -> ok
+  end.
+
+end_per_group(_Group, _Config) -> ok.
 
 end_per_suite(_Config) ->
   ok = katja:stop(),
-  ok.
-
-end_per_testcase(Test, Config) when Test == send_events_pid; Test == send_events_tcp; Test == send_events_udp; Test == send_events_async;
-                                    Test == send_states_pid; Test == send_states_tcp; Test == send_states_udp; Test == send_states_async;
-                                    Test == send_entities_pid; Test == send_entities_async; Test == ignore_unknown_messages ->
-  WPid = ?config(pid_writer, Config),
-  ok = katja_writer:stop(WPid),
-  ok;
-end_per_testcase(_Test, _Config) ->
   ok.
 
 % Tests

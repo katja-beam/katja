@@ -22,10 +22,13 @@
 % Common Test
 -export([
   all/0,
+  groups/0,
   init_per_suite/1,
+  init_per_group/2,
   init_per_testcase/2,
-  end_per_suite/1,
-  end_per_testcase/2
+  end_per_testcase/2,
+  end_per_group/2,
+  end_per_suite/1
 ]).
 
 % Tests
@@ -43,13 +46,29 @@
 
 all() ->
   [
-    query,
-    query_pid,
-    query_async,
-    query_event,
-    query_event_pid,
-    query_event_async,
-    ignore_unknown_messages
+    {group, normal},
+    {group, process},
+    {group, process_args}
+  ].
+
+groups() ->
+  [
+    {normal, [], [
+      query,
+      query_async,
+      query_event,
+      query_event_async
+    ]},
+    {process, [], [
+      query_pid,
+      query_event_pid,
+      ignore_unknown_messages
+    ]},
+    {process_args, [], [
+      query_pid,
+      query_event_pid,
+      ignore_unknown_messages
+    ]}
   ].
 
 init_per_suite(Config) ->
@@ -57,21 +76,32 @@ init_per_suite(Config) ->
   ok = setup_events(),
   Config.
 
-init_per_testcase(Test, Config) when Test == query_pid; Test == query_event_pid; Test == ignore_unknown_messages ->
-  {ok, RPid} = katja_reader:start_link(),
-  [{pid_reader, RPid} | Config];
+init_per_group(Group, Config) -> [{reader_type, Group} | Config].
+
 init_per_testcase(_Test, Config) ->
-  Config.
+  case ?config(reader_type, Config) of
+    process ->
+      {ok, RPid} = katja_reader:start_link(),
+      [{pid_reader, RPid} | Config];
+    process_args ->
+      {ok, RPid} = katja_reader:start_link([{host, "127.0.0.1"}, {port, 5555}]),
+      [{pid_reader, RPid} | Config];
+    _ -> Config
+  end.
+
+end_per_testcase(_Test, Config) ->
+  case ?config(reader_type, Config) of
+    Type when Type == process, Type == process_args ->
+      RPid = ?config(pid_reader, Config),
+      ok = katja_reader:stop(RPid),
+      ok;
+    _ -> ok
+  end.
+
+end_per_group(_Group, _Config) -> ok.
 
 end_per_suite(_Config) ->
   ok = katja:stop(),
-  ok.
-
-end_per_testcase(Test, Config) when Test == query_pid; Test == query_event_pid; Test == ignore_unknown_messages ->
-  RPid = ?config(pid_reader, Config),
-  ok = katja_reader:stop(RPid),
-  ok;
-end_per_testcase(_Test, _Config) ->
   ok.
 
 % Tests

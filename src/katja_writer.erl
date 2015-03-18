@@ -60,7 +60,7 @@ start_link() ->
 start_link(register) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []);
 start_link(Args) ->
-  gen_server:start_link(?MODULE, [], Args).
+  gen_server:start_link(?MODULE, Args, []).
 
 % @doc Stops a writer server process.
 -spec stop(katja:process()) -> ok.
