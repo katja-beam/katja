@@ -159,7 +159,8 @@ maybe_connect_udp(State) ->
 -spec maybe_connect_tcp(state()) -> {ok, state()} | {error, term()}.
 maybe_connect_tcp(#connection_state{host=Host, port=Port, transport=Transport}=S) when Transport == tcp orelse
                                                                                        Transport == detect ->
-  Options = [binary, {active, false}, {nodelay, true}],
+  Options = [binary, {active, false}, {nodelay, true},
+             {send_timeout, 1000}, {send_timeout_close, true}],
   case gen_tcp:connect(Host, Port, Options, 5000) of
     {ok, Socket} ->
       S2 = S#connection_state{tcp_socket=Socket},
