@@ -3,6 +3,7 @@
 ## 0.9
 
 * Improve pooling support
+* Update the `erlang_protobuffs` dependency to version 0.8.1p5
 
 ## 0.8
 
