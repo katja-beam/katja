@@ -1,19 +1,20 @@
 language: erlang
 otp_release:
+  - 18.1
+  - 18.0
+  - 17.5
   - 17.4
   - 17.3
   - 17.1
   - 17.0
   - R16B03-1
-  - R16B03
-  - R16B02
-  - R16B01
+
 script:
   - make dialyze
   - make tests
 
 install:
-  - URL='https://aphyr.com/riemann/riemann_0.2.8_all.deb'; FILE=`mktemp`; DEBIAN_FRONTEND=noninteractive; wget "$URL" -qO $FILE && sudo dpkg -i $FILE; rm $FILE
+  - URL='https://aphyr.com/riemann/riemann_0.2.10_all.deb'; FILE=`mktemp`; DEBIAN_FRONTEND=noninteractive; wget "$URL" -qO $FILE && sudo dpkg -i $FILE; rm $FILE
 before_script:
   - sudo service riemann start
 after_success:
