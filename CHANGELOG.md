@@ -3,7 +3,9 @@
 ## 0.9
 
 * Improve pooling support
-* Update the `erlang_protobuffs` dependency to version 0.8.1p5
+* Update the `erlang_protobuffs` dependency to version 0.8.2
+* Handle `{error, nxdomain}` (thanks [@ichernetsky](https://github.com/ichernetsky))
+* Improved `CLOSE_WAIT` handling (thanks [@ichernetsky](https://github.com/ichernetsky))
 
 ## 0.8
 
