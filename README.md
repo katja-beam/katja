@@ -136,7 +136,7 @@ You can set the `transport` configuration option to `tcp` or `udp` to always use
 
 ## Resources
 
-* [Generated EDoc](http://katja.nifoc.pw/0.8/) ([All Versions](http://katja.nifoc.pw))
+* [Generated EDoc](http://katja.nifoc.pw/0.9/) ([All Versions](http://katja.nifoc.pw))
 * [Katja: Riemann Client Written In Erlang](https://blog.kempkens.io/posts/katja-riemann-client-written-in-erlang/)
 
 ## Related Projects

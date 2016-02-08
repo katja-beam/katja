@@ -2,6 +2,8 @@
 
 ## 0.9
 
+[Documentation](http://katja.nifoc.pw/0.9/)
+
 * Improve pooling support
 * Update the `erlang_protobuffs` dependency to version 0.8.2
 * Handle `{error, nxdomain}` (thanks [@ichernetsky](https://github.com/ichernetsky))
