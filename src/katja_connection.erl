@@ -175,9 +175,17 @@ maybe_connect_tcp(#connection_state{host=Host, port=Port, transport=Transport}=S
       S2 = S#connection_state{tcp_socket=Socket},
       {ok, S2};
     {error, Reason} when Reason == econnrefused orelse
+                         Reason == econnaborted orelse
+                         Reason == econnreset orelse
                          Reason == closed orelse
                          Reason == timeout orelse
-                         Reason == nxdomain ->
+                         Reason == nxdomain orelse
+                         Reason == ehostdown orelse
+                         Reason == ehostunreach orelse
+                         Reason == enetdown orelse
+                         Reason == enetreset orelse
+                         Reason == enetunreach orelse
+                         Reason == enonet ->
       S2 = S#connection_state{tcp_socket=undefined},
       {ok, S2};
     {error, _Reason}=E -> E
