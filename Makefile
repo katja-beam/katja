@@ -64,7 +64,7 @@ coverage-report: $(shell ls -1rt `find logs -type f -name \*.coverdata 2>/dev/nu
 	$(gen_verbose) erl -noshell -pa ebin deps/*/ebin -eval 'ecoveralls:travis_ci("$?"), init:stop()'
 
 upload-docs: docs
-	$(gen_verbose) rsync -avz --no-o --no-g -e ssh --chmod=og=r -p --delete --exclude '*.edoc' --exclude 'edoc-info' doc/ kempkens.io:/iocage/jails/506fd9f8-15c0-11e5-adf5-477a0b920463/root/var/www/nifoc/  $(PROJECT)/$(PROJECT_VERSION)
+	$(gen_verbose) rsync -avz --no-o --no-g -e ssh --chmod=og=r -p --delete --exclude '*.edoc' --exclude 'edoc-info' doc/ kempkens.io:/iocage/jails/506fd9f8-15c0-11e5-adf5-477a0b920463/root/var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION)
 	@ssh kempkens.io chmod 755 /iocage/jails/506fd9f8-15c0-11e5-adf5-477a0b920463/root/var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION)
 	@ssh kempkens.io find /iocage/jails/506fd9f8-15c0-11e5-adf5-477a0b920463/root/var/www/nifoc/$(PROJECT)/$(PROJECT_VERSION) -type d -exec chmod 755 {} +
 
