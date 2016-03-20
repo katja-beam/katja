@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.1
+
+[Documentation](http://katja.nifoc.pw/0.9.1/)
+
+* Handle network-related errors when trying to establish a TCP connection (thanks [@ichernetsky](https://github.com/ichernetsky))
+
 ## 0.9
 
 [Documentation](http://katja.nifoc.pw/0.9/)
