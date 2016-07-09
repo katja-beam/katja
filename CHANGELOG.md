@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.2
+
+[Documentation](http://katja.nifoc.pw/0.9.2/)
+
+* Make Katja work under Erlang 19 (thanks [@srijan](https://github.com/srijan))
+
 ## 0.9.1
 
 [Documentation](http://katja.nifoc.pw/0.9.1/)
