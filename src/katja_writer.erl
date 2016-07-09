@@ -185,9 +185,15 @@ code_change(_OldVsn, State, _Extra) ->
 should_send_data(1.0) ->
   true;
 should_send_data(SampleRate) ->
-  ok = maybe_seed(),
-  random:uniform() =< SampleRate.
+  random_uniform() =< SampleRate.
 
+-ifdef(rand_module).
+random_uniform() ->
+    rand:uniform().
+-else.
+random_uniform() ->
+    ok = maybe_seed(),
+    random:uniform().
 maybe_seed() ->
   _ = case erlang:get(random_seed) of
     undefined -> random:seed(os:timestamp());
@@ -195,6 +201,7 @@ maybe_seed() ->
     _ -> ok
   end,
   ok.
+-endif.
 
 -spec create_event(katja:event()) -> riemannpb_event().
 create_event(Data) ->
