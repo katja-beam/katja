@@ -187,7 +187,7 @@ should_send_data(1.0) ->
 should_send_data(SampleRate) ->
   random_uniform() =< SampleRate.
 
--ifdef(rand_module).
+-ifdef(rand_only).
 random_uniform() ->
     rand:uniform().
 -else.
