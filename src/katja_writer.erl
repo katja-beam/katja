@@ -95,7 +95,7 @@ send_event_async(Pid, Transport, Data, SampleRate) ->
 %      You can set default values for `host', `tags' and `ttl' using the `defaults' configuration option.<br /><br />
 %      Converting `Data' to a format that can be serialized happens inside the process
 %      calling this function.
--spec send_state(katja:process(), katja_connection:transport(), katja:event()) -> ok | {error, term()}.
+-spec send_state(katja:process(), katja_connection:transport(), katja:state()) -> ok | {error, term()}.
 send_state(Pid, Transport, Data) ->
   State = create_state(Data),
   gen_server:call(Pid, {send_message, Transport, state, State}).
@@ -120,8 +120,7 @@ send_state_async(Pid, Transport, Data, SampleRate) ->
 %      can be serialized happens inside the process calling this function.
 -spec send_entities(katja:process(), katja_connection:transport(), katja:entities()) -> ok | {error, term()}.
 send_entities(Pid, Transport, Data) ->
-  {EventEntities, StateEntities} = create_events_and_states(Data),
-  Entities = StateEntities ++ EventEntities,
+  Entities = create_events_and_states(Data),
   gen_server:call(Pid, {send_message, Transport, entities, Entities}).
 
 % @doc Sends multiple entities (events and/or states) to Riemann asynchronously. `SampleRate' is used to randomly drop some entities. Setting it to
@@ -133,8 +132,7 @@ send_entities_async(Pid, Transport, Data, SampleRate) ->
   case should_send_data(SampleRate) of
     false -> ok;
     true ->
-      {EventEntities, StateEntities} = create_events_and_states(Data),
-      Entities = StateEntities ++ EventEntities,
+      Entities = create_events_and_states(Data),
       gen_server:cast(Pid, {send_message, Transport, entities, Entities})
   end.
 
@@ -149,8 +147,8 @@ init(Args) ->
   katja_connection:connect(Host, Port, Transport).
 
 % @hidden
-handle_call({send_message, Transport, _Type, Data}, _From, State) ->
-  Msg = create_message(Data),
+handle_call({send_message, Transport, Type, Data}, _From, State) ->
+  Msg = create_message(Data, Type),
   {Reply, State2} = send_message(Transport, Msg, State),
   {reply, Reply, State2};
 handle_call(terminate, _From, State) ->
@@ -159,8 +157,8 @@ handle_call(_Request, _From, State) ->
   {reply, ignored, State}.
 
 % @hidden
-handle_cast({send_message, Transport, _Type, Data}, State) ->
-  Msg = create_message(Data),
+handle_cast({send_message, Transport, Type, Data}, State) ->
+  Msg = create_message(Data, Type),
   {_Reply, State2} = send_message(Transport, Msg, State),
   {noreply, State2};
 handle_cast(_Msg, State) ->
@@ -320,12 +318,21 @@ current_timestamp() ->
   {MegaSecs, Secs, _MicroSecs} = os:timestamp(),
   MegaSecs * 1000000 + Secs.
 
--spec create_message(riemannpb_entity() | [riemannpb_entity()]) -> riemannpb_message().
-create_message(Entity) when not is_list(Entity) ->
-  create_message([Entity]);
-create_message(Entities) ->
-  {Events, States} = lists:splitwith(fun(Entity) -> is_record(Entity, riemannpb_event) end, Entities),
-  #riemannpb_msg{events=Events, states=States}.
+-spec create_message(riemannpb_entity() | [riemannpb_entity()], event | state | entities) -> riemannpb_message().
+create_message(Events, event) when is_list(Events) ->
+  #riemannpb_msg{events=Events, states=[]};
+
+create_message(States, state) when is_list(States) ->
+  #riemannpb_msg{events=[], states=States};
+
+create_message({Events, States}, entities) when not is_list(Events), not is_list(States) ->
+  create_message({[Events], [States]}, entities);
+
+create_message({Events, States}, entities) ->
+  #riemannpb_msg{events=Events, states=States};
+
+create_message(Entity, Type) when not is_list(Entity) ->
+  create_message([Entity], Type).
 
 -spec send_message(katja_connection:transport(), riemannpb_message(), katja_connection:state()) -> {ok, katja_connection:state()} |
                                                                                                    {{error, term()}, katja_connection:state()}.
@@ -379,14 +386,14 @@ create_state_test() ->
 create_message_test() ->
   Event = create_event(?TEST_DATA),
   State = create_state(?TEST_DATA),
-  ?assertMatch(#riemannpb_msg{events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}]}, create_message(Event)),
-  ?assertMatch(#riemannpb_msg{events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}]}, create_message([Event])),
-  ?assertMatch(#riemannpb_msg{states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]}, create_message(State)),
-  ?assertMatch(#riemannpb_msg{states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]}, create_message([State])),
+  ?assertMatch(#riemannpb_msg{events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}]}, create_message(Event, event)),
+  ?assertMatch(#riemannpb_msg{events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}]}, create_message([Event], event)),
+  ?assertMatch(#riemannpb_msg{states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]}, create_message(State, state)),
+  ?assertMatch(#riemannpb_msg{states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]}, create_message([State], state)),
   ?assertMatch(#riemannpb_msg{
                  events=[#riemannpb_event{service="katja", host="localhost", description="katja test"}],
                  states=[#riemannpb_state{service="katja", host="localhost", description="katja test"}]
-               }, create_message([Event, State])).
+               }, create_message({Event, State}, entities)).
 
 default_hostname_test() ->
   Host = "an.host",

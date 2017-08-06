@@ -10,7 +10,7 @@
   {applications, [
     kernel,
     stdlib,
-    protobuffs
+    gpb
   ]},
   {mod, {katja_app, []}},
   {env, []}

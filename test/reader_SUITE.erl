@@ -110,7 +110,7 @@ query(_Config) ->
   {ok, [ServiceEvent]} = katja:query("service = \"katja 2\" and tagged \"query1\""),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
   {ok, [AttrEvent]} = katja:query("service = \"katja 3\" and metric = 9002 and tagged \"query2\""),
-  {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent),
+  {attributes, [{<<"foo">>,<<"bar">>}]} = lists:keyfind(attributes, 1, AttrEvent),
   {ok, [MultiTagEvent]} = katja:query("service = \"katja 4\" and tagged \"query3\" and tagged \"query4\""),
   {metric, 9003} = lists:keyfind(metric, 1, MultiTagEvent).
 
@@ -119,7 +119,7 @@ query_pid(Config) ->
   {ok, [ServiceEvent]} = katja:query(RPid, "service = \"katja 2\" and tagged \"query1\""),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
   {ok, [AttrEvent]} = katja:query(RPid, "service = \"katja 3\" and metric = 9002 and tagged \"query2\""),
-  {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent),
+  {attributes, [{<<"foo">>,<<"bar">>}]} = lists:keyfind(attributes, 1, AttrEvent),
   {ok, [MultiTagEvent]} = katja:query(RPid, "service = \"katja 4\" and tagged \"query3\" and tagged \"query4\""),
   {metric, 9003} = lists:keyfind(metric, 1, MultiTagEvent).
 
@@ -134,7 +134,7 @@ query_event(_Config) ->
   {ok, [ServiceEvent]} = katja:query_event([{service, "katja 2"}, {tags, ["query1"]}]),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
   {ok, [AttrEvent]} = katja:query_event([{service, "katja 3"}, {metric, 9002}, {tags, ["query2"]}]),
-  {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent),
+  {attributes, [{<<"foo">>,<<"bar">>}]} = lists:keyfind(attributes, 1, AttrEvent),
   {ok, [MultiTagEvent]} = katja:query_event([{service, "katja 4"}, {tags, ["query3", "query4"]}]),
   {metric, 9003} = lists:keyfind(metric, 1, MultiTagEvent).
 
@@ -143,7 +143,7 @@ query_event_pid(Config) ->
   {ok, [ServiceEvent]} = katja:query_event(RPid, [{service, "katja 2"}, {tags, ["query1"]}]),
   {metric, 9001} = lists:keyfind(metric, 1, ServiceEvent),
   {ok, [AttrEvent]} = katja:query_event(RPid, [{service, "katja 3"}, {metric, 9002}, {tags, ["query2"]}]),
-  {attributes, [{"foo", "bar"}]} = lists:keyfind(attributes, 1, AttrEvent),
+  {attributes, [{<<"foo">>,<<"bar">>}]} = lists:keyfind(attributes, 1, AttrEvent),
   {ok, [MultiTagEvent]} = katja:query_event(RPid, [{service, "katja 4"}, {tags, ["query3", "query4"]}]),
   {metric, 9003} = lists:keyfind(metric, 1, MultiTagEvent).
 
