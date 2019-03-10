@@ -1,22 +1,19 @@
 language: erlang
+
 otp_release:
   - 19.0
-  - 18.1
-  - 18.0
+  - 18.3
   - 17.5
-  - 17.4
-  - 17.3
-  - 17.1
-  - 17.0
   - R16B03-1
 
-script:
-  - make dialyze
-  - make tests
-
 install:
-  - URL='https://aphyr.com/riemann/riemann_0.2.10_all.deb'; FILE=`mktemp`; DEBIAN_FRONTEND=noninteractive; wget "$URL" -qO $FILE && sudo dpkg -i $FILE; rm $FILE
-before_script:
-  - sudo service riemann start
-after_success:
-  - make coverage-report
+  - ./rebar3 update
+
+script:
+  - ./rebar3 ct
+
+before_install:
+  - wget https://aphyr.com/riemann/riemann_0.2.11_all.deb
+  - sudo dpkg -i riemann_0.2.11_all.deb
+  - wget https://s3.amazonaws.com/rebar3/rebar3
+  - chmod +x rebar3
