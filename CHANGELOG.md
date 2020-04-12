@@ -4,6 +4,7 @@
 
 * Switch from [erlang.mk](https://github.com/ninenines/erlang.mk) to [rebar3](http://www.rebar3.org)
 * Update the `erlang_protobuffs` dependency to version 0.9.0
+* Add hex.pm package
 
 ## 0.9.2
 
