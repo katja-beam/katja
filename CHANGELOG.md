@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10
+
+* Switch from [erlang.mk](https://github.com/ninenines/erlang.mk) to [rebar3](http://www.rebar3.org)
+* Update the `erlang_protobuffs` dependency to version 0.9.0
+
 ## 0.9.2
 
 [Documentation](http://katja.nifoc.pw/0.9.2/)

@@ -118,7 +118,7 @@
 % @doc Starts the Katja application and all of its dependencies. This is really only meant for usage inside the console.
 -spec start() -> ok.
 start() ->
-  ok = application:start(protobuffs),
+  ok = application:start(gpb),
   ok = application:start(katja),
   ok.
 
@@ -126,7 +126,7 @@ start() ->
 -spec stop() -> ok.
 stop() ->
   ok = application:stop(katja),
-  ok = application:stop(protobuffs),
+  ok = application:stop(gpb),
   ok.
 
 % @doc Delegates to {@link send_event/2}. `Pid' is set to `katja_writer'.
