@@ -12,5 +12,5 @@
 
 -type riemannpb_event() :: #riemannpb_event{}.
 -type riemannpb_state() :: #riemannpb_state{}.
--type riemannpb_entity() :: riemannpb_event() | riemannpb_state().
+-type riemannpb_entity() :: riemannpb_event() | riemannpb_state() | {[riemannpb_event()], [riemannpb_state()]}.
 -type riemannpb_message() :: #riemannpb_msg{}.
