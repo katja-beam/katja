@@ -2,7 +2,7 @@
 
 A simple [Riemann](http://riemann.io) client written in Erlang.
 
-[![Build Status](https://travis-ci.org/katja-beam/katja.png)](https://travis-ci.org/nifoc/katja) [![Coverage Status](https://coveralls.io/repos/github/katja-beam/katja/badge.svg?branch=master)](https://coveralls.io/github/katja-beam/katja?branch=master)
+[![Build Status](https://travis-ci.org/katja-beam/katja.png)](https://travis-ci.org/katja-beam/katja) [![Coverage Status](https://coveralls.io/repos/github/katja-beam/katja/badge.svg?branch=master)](https://coveralls.io/github/katja-beam/katja?branch=master)
 
 ## Status
 
@@ -136,12 +136,12 @@ You can set the `transport` configuration option to `tcp` or `udp` to always use
 
 ## Resources
 
-* [Generated EDoc](http://katja.nifoc.pw/0.9.2/) ([All Versions](http://katja.nifoc.pw))
+* [Generated EDoc](https://hexdocs.pm/katja)
 * [Katja: Riemann Client Written In Erlang](https://blog.kempkens.io/posts/katja-riemann-client-written-in-erlang/)
 
 ## Related Projects
 
-* [Katja VM Stats](https://github.com/nifoc/katja_vmstats) - Easily send information about the Erlang VM to Riemann
+* [Katja VM Stats](https://github.com/katja-beam/katja_vmstats) - Easily send information about the Erlang VM to Riemann
 
 ## License
 
@@ -149,6 +149,7 @@ You can set the `transport` configuration option to `tcp` or `udp` to always use
 
 ```
 Copyright (c) 2014-2016, Daniel Kempkens <daniel@kempkens.io>
+Copyright The katja-beam Contributors
 
 Permission to use, copy, modify, and/or distribute this software for any purpose
 with or without fee is hereby granted, provided that the above copyright notice
