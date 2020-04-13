@@ -234,6 +234,7 @@ send_message_tcp(Msg, #connection_state{tcp_socket=Socket}=S) when is_port(Socke
       end;
     {error, Reason} when Reason == econnrefused orelse
                          Reason == closed orelse
+                         Reason == enotconn orelse
                          Reason == timeout ->
       ok = gen_tcp:close(Socket),
       maybe_connect_and_send_tcp(Msg, S);
