@@ -1,10 +1,11 @@
 language: erlang
 
 otp_release:
-  - 19.0
+  - 22.3.2
+  - 21.3.8.1
+  - 20.3.8
+  - 19.3
   - 18.3
-  - 17.5
-  - R16B03-1
 
 install:
   - ./rebar3 update
@@ -13,7 +14,7 @@ script:
   - ./rebar3 ct
 
 before_install:
-  - wget https://aphyr.com/riemann/riemann_0.2.11_all.deb
-  - sudo dpkg -i riemann_0.2.11_all.deb
+  - wget https://github.com/riemann/riemann/releases/download/0.3.5/riemann_0.3.5_all.deb
+  - sudo dpkg -i riemann_0.3.5_all.deb
   - wget https://s3.amazonaws.com/rebar3/rebar3
   - chmod +x rebar3

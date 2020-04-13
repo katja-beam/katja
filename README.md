@@ -2,7 +2,7 @@
 
 A simple [Riemann](http://riemann.io) client written in Erlang.
 
-[![Build Status](https://travis-ci.org/nifoc/katja.png)](https://travis-ci.org/nifoc/katja) [![Coverage Status](https://coveralls.io/repos/nifoc/katja/badge.png?branch=master)](https://coveralls.io/r/nifoc/katja?branch=master)
+[![Build Status](https://travis-ci.org/katja-beam/katja.png)](https://travis-ci.org/nifoc/katja) [![Coverage Status](https://coveralls.io/repos/github/katja-beam/katja/badge.svg?branch=master)](https://coveralls.io/github/katja-beam/katja?branch=master)
 
 ## Status
 
