@@ -111,7 +111,7 @@ init_per_testcase(_Test, Config) ->
 
 end_per_testcase(_Test, Config) ->
   case ?config(writer_type, Config) of
-    Type when Type == process, Type == process_args ->
+    Type when Type == process; Type == process_args ->
       WPid = ?config(pid_writer, Config),
       ok = katja_writer:stop(WPid),
       ok;
